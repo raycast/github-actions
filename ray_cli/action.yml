@@ -1,0 +1,24 @@
+name: 'Raycast CLI'
+
+description: 'Raycast CLI'
+
+inputs:
+  paths:
+    description: 'Paths to execute on'
+    required: true
+  command:
+    description: 'Ray CLI command (build | publish)'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Install latest npm
+      shell: bash
+      run: |
+        sudo npm install npm@latest -g --silent
+    - name: Execute command
+      shell: bash
+      env:
+        GITHUB_WORKSPACE: $GITHUB_WORKSPACE
+      run: |
+        ${{ github.action_path }}/ray_cli.sh "${{ inputs.command }}" "${{ inputs.paths }}"
