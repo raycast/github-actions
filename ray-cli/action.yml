@@ -12,13 +12,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install latest npm
-      shell: bash
-      run: |
-        sudo npm install npm@latest -g --silent
+    - name: Install npm
+      uses: raycast/github-actions/setup-npm@v1.0.0
     - name: Execute command
       shell: bash
       env:
         GITHUB_WORKSPACE: $GITHUB_WORKSPACE
       run: |
+        set -e -o noglob
         ${{ github.action_path }}/ray_cli.sh "${{ inputs.command }}" "${{ inputs.paths }}"

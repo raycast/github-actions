@@ -1,0 +1,11 @@
+name: 'Setup NPM for Raycast'
+
+description: 'Setup NPM for Raycast'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup npm
+      shell: bash
+      run: |
+        sudo npm install npm@7.24.0 -g --silent

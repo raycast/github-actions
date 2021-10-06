@@ -1,0 +1,33 @@
+name: 'Ray CLI for workflows'
+
+description: 'Ray CLI for workflows'
+
+inputs:
+  access_token:
+    description: 'Access Token'
+    required: true
+  api_url:
+    description: 'API url'
+    required: true
+  command:
+    description: 'Ray CLI command (build | publish)'
+    required: true
+  paths:
+    description: 'Paths to execute on'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Setup CLI
+      uses: raycast/github-actions/setup-cli@v1.0.0
+      with:
+        access_token: ${{ inputs.access_token }}
+        api_url: ${{ inputs.api_url }}
+    - name: Generate vars
+      id: generate_vars
+      uses: raycast/github-actions/generate-vars@v1.0.0
+    - name: Ray CLI
+      uses: raycast/github-actions/ray-cli@v1.0.0
+      with:
+        paths: ${{ steps.generate_vars.outputs.paths }}
+        command: ${{ steps.generate_vars.outputs.command }}
