@@ -1,0 +1,26 @@
+name: 'Get paths based on github_event_name'
+
+description: 'Get paths based on github_event_name'
+
+inputs:
+  custom_paths:
+    description: "Paths from user input for manually dispatched runs"
+  github_event_name:
+    description: "github.event_name"
+outputs:
+  paths:
+    description: "Paths based on github.event_name"
+    value: ${{ steps.get_paths.outputs.paths }}
+runs:
+  using: "composite"
+  steps:
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v1.1.3
+    - name: Get paths
+      shell: bash
+      id: get_paths
+      run: |
+        set -e -o noglob
+        paths=$(${{ github.action_path }}/get_paths.sh "${{ inputs.github_event_name }}" "${{ steps.changed-files.outputs.all_modified_files }}" "${{ inputs.custom_paths }}")
+        echo "::set-output name=paths::$paths"

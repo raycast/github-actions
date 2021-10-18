@@ -1,0 +1,25 @@
+name: 'Get command to execute on CLI based on github_event_name'
+
+description: 'Get command to execute on CLI based on github_event_name'
+
+inputs:
+  custom_command:
+    description: "User defined custom command for workflow_dispatch"
+  github_event_name:
+    description: "github.event_name"
+outputs:
+  command:
+    description: "command"
+    value: ${{ steps.get_command.outputs.command }}
+runs:
+  using: "composite"
+  steps:
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v1.1.3
+    - name: Generate paths and command
+      shell: bash
+      id: get_command
+      run: |
+        command=$(${{ github.action_path }}/get_command.sh "${{ inputs.github_event_name }}" "${{ inputs.custom_command }}")
+        echo "::set-output name=command::$command"

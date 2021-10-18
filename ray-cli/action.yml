@@ -13,7 +13,7 @@ runs:
   using: "composite"
   steps:
     - name: Install npm
-      uses: raycast/github-actions/setup-npm@v1.0.0
+      uses: raycast/github-actions/setup-npm@v1.1.0
     - name: Execute command
       shell: bash
       env:

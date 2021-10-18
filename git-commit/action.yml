@@ -1,0 +1,29 @@
+name: 'Git commit'
+
+description: 'Git commit'
+
+inputs:
+  message:
+    description: 'Commit messsage'
+    required: true
+  repo_dir:
+    description: 'Directory to add & commit'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup GIT
+      uses: raycast/github-actions/setup-git@v1.1.0
+    - name: Commit
+      shell: bash
+      working-directory: ${{ inputs.repo_dir }}
+      run: |
+        if ! [[ -z $(git status -s) ]] ; then
+          git add .
+          git status .
+          git commit --message "${{ inputs.message }}"
+          git push -u origin HEAD
+        else
+          echo "No changes, skipping sync."
+        fi

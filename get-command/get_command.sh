@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -e -o noglob
 
 event_name=$1
 command_from_input=$2

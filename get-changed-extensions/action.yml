@@ -1,0 +1,29 @@
+name: 'Get paths'
+
+description: 'Get changed extensions'
+
+inputs:
+  custom_paths:
+    description: "Paths from user input for manually dispatched runs"
+  github_event_name:
+    description: "github.event_name"
+outputs:
+  paths:
+    description: "Paths for changed extensions"
+    value: ${{ steps.get_changed_extensions.outputs.paths }}
+runs:
+  using: "composite"
+  steps:
+    - name: Get paths
+      id: get_paths
+      uses: raycast/github-actions/get-paths@v1.1.0
+      with:
+        custom_paths: ${{ inputs.custom_paths }}
+        github_event_name: ${{ inputs.github_event_name }}
+    - name: Get changed extensions
+      shell: bash
+      id: get_changed_extensions
+      run: |
+        set -e -o noglob
+        paths=$(${{ github.action_path }}/get_changed_extensions.sh "${{ steps.get_paths.outputs.paths }}")
+        echo "::set-output name=paths::$paths"

@@ -19,15 +19,24 @@ runs:
   using: "composite"
   steps:
     - name: Setup CLI
-      uses: raycast/github-actions/setup-cli@v1.0.0
+      uses: raycast/github-actions/setup-cli@v1.1.0
       with:
         access_token: ${{ inputs.access_token }}
         api_url: ${{ inputs.api_url }}
-    - name: Generate vars
-      id: generate_vars
-      uses: raycast/github-actions/generate-vars@v1.0.0
-    - name: Ray CLI
-      uses: raycast/github-actions/ray-cli@v1.0.0
+    - name: Get command
+      id: get_command
+      uses: raycast/github-actions/get-command@v1.1.0
       with:
-        paths: ${{ steps.generate_vars.outputs.paths }}
-        command: ${{ steps.generate_vars.outputs.command }}
+        custom_command: ${{ github.event.inputs.command }}
+        github_event_name: ${{ github.event_name }}
+    - name: Get changed extensions
+      id: get_changed_extensions
+      uses: raycast/github-actions/get-changed-extensions@v1.1.0
+      with:
+        custom_paths: ${{ github.event.inputs.paths }}
+        github_event_name: ${{ github.event_name }}
+    - name: Ray CLI
+      uses: raycast/github-actions/ray-cli@v1.1.0
+      with:
+        paths: ${{ steps.get_changed_extensions.outputs.paths }}
+        command: ${{ steps.get_command.outputs.command }}
