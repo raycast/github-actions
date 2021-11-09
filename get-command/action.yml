@@ -14,9 +14,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Get changed files
-      id: changed-files
-      uses: tj-actions/changed-files@v1.1.3
     - name: Generate paths and command
       shell: bash
       id: get_command

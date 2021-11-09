@@ -9,13 +9,18 @@ inputs:
   command:
     description: 'Ray CLI command (build | publish)'
     required: true
+outputs:
+  store_urls:
+    description: 'Store URLs for published extensions'
+    value: ${{ steps.ray_cli.outputs.store_urls }}
 runs:
   using: "composite"
   steps:
     - name: Install npm
-      uses: raycast/github-actions/setup-npm@v1.1.0
+      uses: raycast/github-actions/setup-npm@v1.2.0
     - name: Execute command
       shell: bash
+      id: ray_cli
       env:
         GITHUB_WORKSPACE: $GITHUB_WORKSPACE
       run: |

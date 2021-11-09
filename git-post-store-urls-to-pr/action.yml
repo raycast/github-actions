@@ -1,0 +1,33 @@
+name: 'Git Post Store URLs to PR'
+
+description: 'Git Post Store URLs to PR'
+
+inputs:
+  store_urls:
+    description: "Store URLs to published extensions"
+    required: true
+  github_token:
+    description: "Github Token"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup GIT
+      uses: raycast/github-actions/setup-git@v1.2.0
+    - name: Check message
+      id: check_message
+      shell: bash
+      run: |
+        if [ ! -z "${{ inputs.store_urls }}" ]; then
+          echo ::set-output name=message_exists::'true'
+        fi
+    - uses: mshick/add-pr-comment@v1
+      if: ${{ steps.check_message.outputs.message_exists }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      with:
+        message: |
+          **Published to the Raycast Store:**
+          ${{ inputs.store_urls }}
+        allow-repeats: true
