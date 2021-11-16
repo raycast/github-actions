@@ -3,6 +3,9 @@ name: 'Setup Raycast CLI'
 description: 'Setup Raycast CLI'
 
 inputs:
+  version:
+    description: 'CLI version (format: v1.0.0)'
+    required: true
   access_token:
     description: 'Access Token'
     required: true
@@ -15,4 +18,4 @@ runs:
     - name: Setup CLI
       shell: bash
       run: |
-        ${{ github.action_path }}/setup_cli.sh "${{ inputs.access_token }}" "${{ inputs.api_url }}"
+        ${{ github.action_path }}/setup_cli.sh "${{ inputs.version }}" "${{ inputs.access_token }}" "${{ inputs.api_url }}"

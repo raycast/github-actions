@@ -42,28 +42,40 @@ scheme_path="/tmp/raycast/extensions.json"
 curl https://www.raycast.com/schemas/extension.json --create-dirs -o $scheme_path
 
 starting_dir=$PWD
-ray_full_command="ray $ray_command -v $scheme_path --exitOnError"
-ray_cli_log_file="/tmp/capture.out"
+ray_validate="ray validate -s $scheme_path --exitOnError"
+ray_build_publish="ray $ray_command --exitOnError"
+ray_ci_log_file="/tmp/raycast/ray_cli.log"
 
-exit_code=0
+last_exit_code=0
+exit_code=$last_exit_code
+
 declare -a 'store_urls'
 
-for dir in "${paths[@]}" ; do
+for dir in "${paths[@]}" ; do    
     extension_folder=`basename $dir`
     printf "\nEntering $dir\n"
     cd "$dir"
+
     set +e
-    printf "Executing 'npm CI'\n"
-    npm ci --silent
-    printf "Executing '$ray_full_command'\n"
-    $ray_full_command 2>&1 | tee $ray_cli_log_file ; test ${PIPESTATUS[0]} -eq 0
+    $ray_validate 2>&1 | tee $ray_ci_log_file ; test ${PIPESTATUS[0]} -eq 0
     last_exit_code=${?}
     set -e
-    if [ $exit_code == 0 ]; then
+    if [ $last_exit_code -eq 0 ]; then
+        
+        if [ $last_exit_code -eq 0 ]; then
+            set +e
+            npm ci --silent
+            $ray_build_publish 2>&1 | tee $ray_ci_log_file ; test ${PIPESTATUS[0]} -eq 0
+            last_exit_code=${?}
+            set -e
+        fi
+    fi
+
+    if [ $exit_code -eq 0 ]; then
         exit_code=$last_exit_code
     fi
     if [ $last_exit_code -ne 0 ]; then
-        error_message=`tr '\n' ' ' < $ray_cli_log_file`
+        error_message=`cat $ray_ci_log_file | tail -1`
         echo "::error title=$command failed for $extension_folder::$error_message"
     else
         if [ "$command" == "publish" ]; then
@@ -83,6 +95,7 @@ for dir in "${paths[@]}" ; do
     cd $starting_dir
 done
 
+# encode multiline output for github actions
 store_urls_string=$(printf "%s\n" "${store_urls[@]}")
 store_urls_string="${store_urls_string//'%'/'%25'}"
 store_urls_string="${store_urls_string//$'\n'/'%0A'}"
