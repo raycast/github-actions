@@ -15,6 +15,9 @@ inputs:
   paths:
     description: 'Paths to execute on'
     required: true
+  cli_version:
+    description: 'CLI Version'
+    required: true
 outputs:
   command:
     description: 'Ray CLI command executed'
@@ -29,26 +32,26 @@ runs:
   using: "composite"
   steps:
     - name: Setup CLI
-      uses: raycast/github-actions/setup-cli@v1.3.0
+      uses: raycast/github-actions/setup-cli@v1.4.0
       with:
-        version: "v1.0.0"
+        version: ${{ inputs.cli_version }}
         access_token: ${{ inputs.access_token }}
         api_url: "https://www.raycast.com/"
     - name: Get command
       id: get_command
-      uses: raycast/github-actions/get-command@v1.3.0
+      uses: raycast/github-actions/get-command@v1.4.0
       with:
         custom_command: ${{ github.event.inputs.command }}
         github_event_name: ${{ github.event_name }}
     - name: Get changed extensions
       id: get_changed_extensions
-      uses: raycast/github-actions/get-changed-extensions@v1.3.0
+      uses: raycast/github-actions/get-changed-extensions@v1.4.0
       with:
         custom_paths: ${{ github.event.inputs.paths }}
         github_event_name: ${{ github.event_name }}
     - name: Ray CLI
       id: ray_cli
-      uses: raycast/github-actions/ray-cli@v1.3.0
+      uses: raycast/github-actions/ray-cli@v1.4.0
       with:
         paths: ${{ steps.get_changed_extensions.outputs.paths }}
         command: ${{ steps.get_command.outputs.command }}

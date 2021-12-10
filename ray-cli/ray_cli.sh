@@ -61,14 +61,12 @@ for dir in "${paths[@]}" ; do
     last_exit_code=${?}
     set -e
     if [ $last_exit_code -eq 0 ]; then
-        
-        if [ $last_exit_code -eq 0 ]; then
-            set +e
-            npm ci --silent
-            $ray_build_publish 2>&1 | tee $ray_ci_log_file ; test ${PIPESTATUS[0]} -eq 0
-            last_exit_code=${?}
-            set -e
-        fi
+        set +e
+        npm ci --silent
+        $ray_build_publish 2>&1 | tee $ray_ci_log_file ; test ${PIPESTATUS[0]} -eq 0
+        last_exit_code=${?}
+        set -e
+        rm -rf ./node_modules
     fi
 
     if [ $exit_code -eq 0 ]; then

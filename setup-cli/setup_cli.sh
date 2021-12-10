@@ -15,8 +15,12 @@ path=~/.config/raycast-debug
 mkdir -p $path
 config_file_path=$path/config.json
 jq -n --arg accesstoken "$access_token" --arg apiurl "$api_url" '{"accesstoken": $accesstoken, "apiurl": $apiurl}' > $config_file_path
-
-wget -q -O "/usr/local/bin/ray" "https://raycast-cli.s3.eu-central-1.amazonaws.com/linux/ray-$version"
-wait
-chmod +x "/usr/local/bin/ray"
+cli_url="https://raycast-cli.s3.eu-central-1.amazonaws.com/linux/ray-v$version"
+target_path="/usr/local/bin/ray"
+echo "Downloading: $cli_url"
+if ! wget -q -O $target_path $cli_url; then
+    echo "Failed downloading $cli_url"
+    exit 1
+fi
+chmod +x $target_path
 ray version
