@@ -6,15 +6,17 @@ version=$1
 access_token=$2
 api_url=$3
 
-if test "$#" -ne 3; then
+if test "$#" -eq 3; then
+    path=~/.config/raycast-debug
+    mkdir -p $path
+    config_file_path=$path/config.json
+    echo "Generate config $config_file_path"
+    jq -n --arg accesstoken "$access_token" --arg apiurl "$api_url" '{"accesstoken": $accesstoken, "apiurl": $apiurl}' > $config_file_path
+elif test "$#" -ne 1; then
     echo "Usage: setup_cli.sh version access_token api_url"
     exit 1
 fi
 
-path=~/.config/raycast-debug
-mkdir -p $path
-config_file_path=$path/config.json
-jq -n --arg accesstoken "$access_token" --arg apiurl "$api_url" '{"accesstoken": $accesstoken, "apiurl": $apiurl}' > $config_file_path
 cli_url="https://raycast-cli.s3.eu-central-1.amazonaws.com/linux/ray-v$version"
 target_path="/usr/local/bin/ray"
 echo "Downloading: $cli_url"

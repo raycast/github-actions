@@ -1,0 +1,41 @@
+name: "Publish NPM to a given registry"
+
+description: "Publish NPM to a given registry"
+
+inputs:
+  npm_package_path:
+    description: "NPM package path"
+  npm_registry:
+    description: "NPM registry"
+  npm_publish_token:
+    description: "Publish token"
+outputs:
+  version:
+    description: "version"
+    value: ${{ steps.publish_npm.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - name: Setup npm
+      uses: raycast/github-actions/setup-npm@master
+    - name: Publish NPM
+      shell: bash
+      working-directory: ${{ inputs.npm_package_path }}
+      id: publish_npm
+      run: |
+        echo "//${{ inputs.npm_registry }}/:_authToken=${{ inputs.npm_publish_token }}" >> .npmrc
+        echo "@raycast:registry=https://${{ inputs.npm_registry }}" >> .npmrc
+
+        version=`jq -r .version package.json`
+        name=`jq -r .name package.json`
+        public_version=`npm show $name version`
+
+        echo "Candidate version: $version"
+        echo "Registry version: $public_version"
+
+        if [[ "$version" != "$public_version" ]]; then
+            npm publish
+            echo "::set-output name=version::$version"
+        else
+            echo "Skipping API publishing"
+        fi

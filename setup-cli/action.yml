@@ -1,17 +1,17 @@
-name: 'Setup Raycast CLI'
+name: "Setup Raycast CLI"
 
-description: 'Setup Raycast CLI'
+description: "Setup Raycast CLI"
 
 inputs:
   version:
-    description: 'CLI version (format: v1.0.0)'
+    description: "CLI version (format: v1.0.0)"
     required: true
   access_token:
-    description: 'Access Token'
-    required: true
+    description: "Access Token"
+    required: false
   api_url:
-    description: 'API url'
-    required: true
+    description: "API url"
+    required: false
 runs:
   using: "composite"
   steps:

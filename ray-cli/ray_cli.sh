@@ -56,18 +56,39 @@ for dir in "${paths[@]}" ; do
     printf "\nEntering $dir\n"
     cd "$dir"
 
+    ### Precheck package-lock existance for more readable errors
+    if [ ! -f "./package-lock.json" ]; then
+        echo "::error::Missing package-lock.json for $extension_folder"
+        exit 1
+    fi
+
+    # npm ci doesn't allow us to silence output properly
+    # run it silently first and if it fails run it without silencing
+    set +e
+    npm ci --silent
+    last_exit_code=${?}
+    set -e
+
+    if [ $last_exit_code -ne 0 ]; then
+        echo "::error::Npm ci failed for $extension_folder"
+        npm ci
+        exit 1
+    fi
+
+    ### Validate
     set +e
     $ray_validate 2>&1 | tee $ray_ci_log_file ; test ${PIPESTATUS[0]} -eq 0
     last_exit_code=${?}
     set -e
     if [ $last_exit_code -eq 0 ]; then
         set +e
-        npm ci --silent
         $ray_build_publish 2>&1 | tee $ray_ci_log_file ; test ${PIPESTATUS[0]} -eq 0
         last_exit_code=${?}
         set -e
-        rm -rf ./node_modules
     fi
+
+    #cleanup npm
+    rm -rf ./node_modules
 
     if [ $exit_code -eq 0 ]; then
         exit_code=$last_exit_code

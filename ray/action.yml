@@ -1,57 +1,57 @@
-name: 'Ray CLI for workflows'
+name: "Ray CLI for workflows"
 
-description: 'Ray CLI for workflows'
+description: "Ray CLI for workflows"
 
 inputs:
   access_token:
-    description: 'Access Token'
+    description: "Access Token"
     required: true
   api_url:
-    description: 'API url'
+    description: "API url"
     required: true
   command:
-    description: 'Ray CLI command (build | publish)'
+    description: "Ray CLI command (build | publish)"
     required: true
   paths:
-    description: 'Paths to execute on'
+    description: "Paths to execute on"
     required: true
   cli_version:
-    description: 'CLI Version'
-    required: true
+    description: "CLI Version"
+    required: false
 outputs:
   command:
-    description: 'Ray CLI command executed'
+    description: "Ray CLI command executed"
     value: ${{ steps.get_command.outputs.command }}
   paths:
     description: "Paths for changed extensions"
     value: ${{ steps.get_changed_extensions.outputs.paths }}
   store_urls:
-    description: 'Store URLs for published extensions'
+    description: "Store URLs for published extensions"
     value: ${{ steps.ray_cli.outputs.store_urls }}
 runs:
   using: "composite"
   steps:
     - name: Setup CLI
-      uses: raycast/github-actions/setup-cli@v1.4.0
+      uses: raycast/github-actions/setup-cli@v1.5.0
       with:
-        version: ${{ inputs.cli_version }}
+        version: ${{ inputs.cli_version || '1.3.0' }}
         access_token: ${{ inputs.access_token }}
         api_url: "https://www.raycast.com/"
     - name: Get command
       id: get_command
-      uses: raycast/github-actions/get-command@v1.4.0
+      uses: raycast/github-actions/get-command@v1.5.0
       with:
         custom_command: ${{ github.event.inputs.command }}
         github_event_name: ${{ github.event_name }}
     - name: Get changed extensions
       id: get_changed_extensions
-      uses: raycast/github-actions/get-changed-extensions@v1.4.0
+      uses: raycast/github-actions/get-changed-extensions@v1.5.0
       with:
         custom_paths: ${{ github.event.inputs.paths }}
         github_event_name: ${{ github.event_name }}
     - name: Ray CLI
       id: ray_cli
-      uses: raycast/github-actions/ray-cli@v1.4.0
+      uses: raycast/github-actions/ray-cli@v1.5.0
       with:
         paths: ${{ steps.get_changed_extensions.outputs.paths }}
         command: ${{ steps.get_command.outputs.command }}
