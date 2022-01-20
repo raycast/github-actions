@@ -1,6 +1,6 @@
-name: 'Git Post Store URLs to PR'
+name: "Git Post Store URLs to PR"
 
-description: 'Git Post Store URLs to PR'
+description: "Git Post Store URLs to PR"
 
 inputs:
   store_urls:
@@ -14,7 +14,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup GIT
-      uses: raycast/github-actions/setup-git@v1.5.0
+      uses: raycast/github-actions/setup-git@v1.6.0
     - name: Check message
       id: check_message
       shell: bash

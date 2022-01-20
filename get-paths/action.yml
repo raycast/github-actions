@@ -1,6 +1,6 @@
-name: 'Get paths based on github_event_name'
+name: "Get paths based on github_event_name"
 
-description: 'Get paths based on github_event_name'
+description: "Get paths based on github_event_name"
 
 inputs:
   custom_paths:
@@ -16,10 +16,7 @@ runs:
   steps:
     - name: Get changed files
       id: changed-files
-      uses: tj-actions/changed-files@v13
-      with:
-        base_sha: ${{ github.event.pull_request.base.sha }}
-        sha: ${{ github.event.pull_request.head.sha }}
+      uses: tj-actions/changed-files@v14.6
     - name: Get paths
       shell: bash
       id: get_paths

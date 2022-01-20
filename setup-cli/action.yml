@@ -9,13 +9,10 @@ inputs:
   access_token:
     description: "Access Token"
     required: false
-  api_url:
-    description: "API url"
-    required: false
 runs:
   using: "composite"
   steps:
     - name: Setup CLI
       shell: bash
       run: |
-        ${{ github.action_path }}/setup_cli.sh "${{ inputs.version }}" "${{ inputs.access_token }}" "${{ inputs.api_url }}"
+        ${{ github.action_path }}/setup_cli.sh "${{ inputs.version }}" "${{ inputs.access_token }}"

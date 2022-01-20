@@ -9,12 +9,15 @@ inputs:
   repo_dir:
     description: "Directory to add & commit"
     required: true
+  auto_resolve_conflicts:
+    description: "Use '-X ours' on rebase"
+    required: false
 
 runs:
   using: "composite"
   steps:
     - name: Setup GIT
-      uses: raycast/github-actions/setup-git@v1.5.0
+      uses: raycast/github-actions/setup-git@v1.6.0
     - name: Commit
       shell: bash
       working-directory: ${{ inputs.repo_dir }}
@@ -23,7 +26,12 @@ runs:
           git add .
           git status .
           git commit --message "${{ inputs.message }}"
-          git push -u origin HEAD
+
+          branch_name=$(git rev-parse --abbrev-ref HEAD)
+          git_conflicts="" && [[ "${{ inputs.auto_resolve_conflicts }}" == true ]] && git_conflicts="-X ours"
+          git fetch origin $branch_name
+          git rebase origin/$branch_name $git_conflicts
+          git push -u origin $branch_name
         else
           echo "No changes, skipping sync."
         fi

@@ -6,9 +6,6 @@ inputs:
   access_token:
     description: "Access Token"
     required: true
-  api_url:
-    description: "API url"
-    required: true
   command:
     description: "Ray CLI command (build | publish)"
     required: true
@@ -17,6 +14,9 @@ inputs:
     required: true
   cli_version:
     description: "CLI Version"
+    required: false
+  npm_token:
+    description: "NPM token"
     required: false
 outputs:
   command:
@@ -32,26 +32,26 @@ runs:
   using: "composite"
   steps:
     - name: Setup CLI
-      uses: raycast/github-actions/setup-cli@v1.5.0
+      uses: raycast/github-actions/setup-cli@v1.6.0
       with:
-        version: ${{ inputs.cli_version || '1.3.0' }}
+        version: ${{ inputs.cli_version || '1.4.4' }}
         access_token: ${{ inputs.access_token }}
-        api_url: "https://www.raycast.com/"
     - name: Get command
       id: get_command
-      uses: raycast/github-actions/get-command@v1.5.0
+      uses: raycast/github-actions/get-command@v1.6.0
       with:
-        custom_command: ${{ github.event.inputs.command }}
+        custom_command: ${{ inputs.command }}
         github_event_name: ${{ github.event_name }}
     - name: Get changed extensions
       id: get_changed_extensions
-      uses: raycast/github-actions/get-changed-extensions@v1.5.0
+      uses: raycast/github-actions/get-changed-extensions@v1.6.0
       with:
-        custom_paths: ${{ github.event.inputs.paths }}
+        custom_paths: ${{ inputs.paths }}
         github_event_name: ${{ github.event_name }}
     - name: Ray CLI
       id: ray_cli
-      uses: raycast/github-actions/ray-cli@v1.5.0
+      uses: raycast/github-actions/ray-cli@v1.6.0
       with:
         paths: ${{ steps.get_changed_extensions.outputs.paths }}
         command: ${{ steps.get_command.outputs.command }}
+        npm_token: ${{ inputs.npm_token }}

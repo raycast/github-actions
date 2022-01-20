@@ -1,6 +1,6 @@
-name: 'Setup Xcode'
+name: "Setup Xcode"
 
-description: 'Setup Xcode'
+description: "Setup Xcode"
 
 runs:
   using: "composite"
@@ -8,5 +8,4 @@ runs:
     - name: Set up Xcode version
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: 13.1.x
-        
+        xcode-version: 13.2.x

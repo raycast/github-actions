@@ -16,14 +16,20 @@ else
     declare -a 'paths=('"$2"')'
 fi
 
+if [ ! -z "$3" ]; then
+    npm_token=$3
+fi
+
 function ray_command_from_string() {
     case $1 in
         build)
         ray_command="build -e dist"
+        without_token="--skip-owner"
         ;;
 
         publish)
-        ray_command="publish -f"
+        ray_command="publish --skip-validation"
+        without_token=""
         ;;
 
         *)
@@ -42,8 +48,8 @@ scheme_path="/tmp/raycast/extensions.json"
 curl https://www.raycast.com/schemas/extension.json --create-dirs -o $scheme_path
 
 starting_dir=$PWD
-ray_validate="ray validate -s $scheme_path --exitOnError"
-ray_build_publish="ray $ray_command --exitOnError"
+ray_validate="ray validate -s $scheme_path $without_token --strict --non-interactive --emoji --exit-on-error"
+ray_build_publish="ray $ray_command --non-interactive --emoji --exit-on-error"
 ray_ci_log_file="/tmp/raycast/ray_cli.log"
 
 last_exit_code=0
@@ -62,6 +68,20 @@ for dir in "${paths[@]}" ; do
         exit 1
     fi
 
+    ### Create .npmrc if needed
+    cleanup_npmrc=false
+    api_version=$(jq '.dependencies."@raycast/api"' package.json)
+    if [[ "$api_version" == *"alpha"* ]]; then
+        if [ -z "$npm_token" ]; then
+            echo "::error::Private npm used without npm_token parameter"
+            exit 1
+        else
+            echo "//npm.pkg.github.com/:_authToken=$npm_token" > .npmrc
+            echo "@raycast:registry=https://npm.pkg.github.com" >> .npmrc
+            cleanup_npmrc=true
+        fi
+    fi
+
     # npm ci doesn't allow us to silence output properly
     # run it silently first and if it fails run it without silencing
     set +e
@@ -73,6 +93,11 @@ for dir in "${paths[@]}" ; do
         echo "::error::Npm ci failed for $extension_folder"
         npm ci
         exit 1
+    fi
+
+    ### Cleanup `.npmrc`
+    if [ "$cleanup_npmrc" = true ] ; then
+        rm .npmrc
     fi
 
     ### Validate

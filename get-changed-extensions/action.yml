@@ -1,6 +1,6 @@
-name: 'Get paths'
+name: "Get paths"
 
-description: 'Get changed extensions'
+description: "Get changed extensions"
 
 inputs:
   custom_paths:
@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Get paths
       id: get_paths
-      uses: raycast/github-actions/get-paths@v1.5.0
+      uses: raycast/github-actions/get-paths@v1.6.0
       with:
         custom_paths: ${{ inputs.custom_paths }}
         github_event_name: ${{ inputs.github_event_name }}

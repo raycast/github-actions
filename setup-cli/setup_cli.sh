@@ -4,16 +4,15 @@ set -e
 
 version=$1
 access_token=$2
-api_url=$3
 
-if test "$#" -eq 3; then
+if test "$#" -eq 2; then
     path=~/.config/raycast-debug
     mkdir -p $path
     config_file_path=$path/config.json
     echo "Generate config $config_file_path"
-    jq -n --arg accesstoken "$access_token" --arg apiurl "$api_url" '{"accesstoken": $accesstoken, "apiurl": $apiurl}' > $config_file_path
+    jq -n --arg accesstoken "$access_token" '{"accesstoken": $accesstoken}' > $config_file_path
 elif test "$#" -ne 1; then
-    echo "Usage: setup_cli.sh version access_token api_url"
+    echo "Usage: setup_cli.sh version access_token"
     exit 1
 fi
 
