@@ -17,7 +17,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup GIT
-      uses: raycast/github-actions/setup-git@v1.6.0
+      uses: raycast/github-actions/setup-git@v1.7.0
     - name: Commit
       shell: bash
       working-directory: ${{ inputs.repo_dir }}
