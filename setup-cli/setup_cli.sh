@@ -16,7 +16,7 @@ elif test "$#" -ne 1; then
     exit 1
 fi
 
-cli_url="https://raycast-cli.s3.eu-central-1.amazonaws.com/linux/ray-v$version"
+cli_url="https://raycast-cli.s3.eu-central-1.amazonaws.com/$version/linux/ray"
 target_path="/usr/local/bin/ray"
 echo "Downloading: $cli_url"
 if ! wget -q -O $target_path $cli_url; then

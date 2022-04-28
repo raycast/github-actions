@@ -24,12 +24,12 @@ function ray_command_from_string() {
     case $1 in
         build)
         ray_command="build -e dist"
-        without_token="--skip-owner"
+        ray_validate_options="--skip-owner"
         ;;
 
         publish)
         ray_command="publish --skip-validation"
-        without_token=""
+        ray_validate_options=""
         ;;
 
         *)
@@ -48,7 +48,7 @@ scheme_path="/tmp/raycast/extensions.json"
 curl https://www.raycast.com/schemas/extension.json --create-dirs -o $scheme_path
 
 starting_dir=$PWD
-ray_validate="ray validate -s $scheme_path $without_token --strict --non-interactive --emoji --exit-on-error"
+ray_validate="ray validate $ray_validate_options -s $scheme_path --strict --non-interactive --emoji --exit-on-error"
 ray_build_publish="ray $ray_command --non-interactive --emoji --exit-on-error"
 ray_ci_log_file="/tmp/raycast/ray_cli.log"
 
@@ -65,6 +65,11 @@ for dir in "${paths[@]}" ; do
     ### Precheck package-lock existance for more readable errors
     if [ ! -f "./package-lock.json" ]; then
         echo "::error::Missing package-lock.json for $extension_folder"
+        exit 1
+    fi
+
+    if [ -f "./yarn.lock" ]; then
+        echo "::error::Remove yarn.lock for $extension_folder"
         exit 1
     fi
 
