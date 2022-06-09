@@ -12,6 +12,9 @@ inputs:
   npm_token:
     description: "NPM token"
     required: false
+  extension_schema:
+    description: "Extension schema"
+    required: false
 outputs:
   store_urls:
     description: "Store URLs for published extensions"
@@ -20,7 +23,7 @@ runs:
   using: "composite"
   steps:
     - name: Install npm
-      uses: raycast/github-actions/setup-npm@v1.9.0
+      uses: raycast/github-actions/setup-npm@v1.10.0
     - name: Execute command
       shell: bash
       id: ray_cli
@@ -28,4 +31,4 @@ runs:
         GITHUB_WORKSPACE: $GITHUB_WORKSPACE
       run: |
         set -e -o noglob
-        ${{ github.action_path }}/ray_cli.sh "${{ inputs.command }}" "${{ inputs.paths }}" "${{ inputs.npm_token }}"
+        ${{ github.action_path }}/ray_cli.sh "${{ inputs.command }}" "${{ inputs.paths }}" "${{ inputs.npm_token }}" "${{ inputs.extension_schema }}"

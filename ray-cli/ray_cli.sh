@@ -20,6 +20,12 @@ if [ ! -z "$3" ]; then
     npm_token=$3
 fi
 
+if [ ! -z "$4" ]; then
+    extension_schema=$4
+else
+    extension_schema="https://www.raycast.com/schemas/extension.json"
+fi
+
 function ray_command_from_string() {
     case $1 in
         build)
@@ -43,9 +49,9 @@ ray_command_from_string $command
 printf "🤖 %d extensions found\n" "${#paths[@]}"
 printf '%s\n' "${paths[@]}"
 
-printf "🤖 Downloading JSON scheme"
+printf "🤖 Downloading JSON scheme: $extension_schema"
 scheme_path="/tmp/raycast/extensions.json"
-curl https://www.raycast.com/schemas/extension.json --create-dirs -o $scheme_path
+curl "$extension_schema" --create-dirs -o $scheme_path
 
 starting_dir=$PWD
 ray_validate="ray validate $ray_validate_options -s $scheme_path --strict --non-interactive --emoji --exit-on-error"

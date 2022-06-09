@@ -1,6 +1,6 @@
-name: 'Setup NPM for Raycast'
+name: "Setup NPM for Raycast"
 
-description: 'Setup NPM for Raycast'
+description: "Setup NPM for Raycast"
 
 runs:
   using: "composite"
@@ -8,4 +8,6 @@ runs:
     - name: Setup npm
       shell: bash
       run: |
-        sudo npm install npm@7.24.0 -g --silent
+        npm install npm@8.3.0 --location=global
+        which npm
+        npm -v

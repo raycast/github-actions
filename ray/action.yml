@@ -1,22 +1,25 @@
-name: "Ray CLI for workflows"
+name: "Extensions build & publis"
 
-description: "Ray CLI for workflows"
+description: "Extensions build & publis"
 
 inputs:
   access_token:
     description: "Access Token"
-    required: true
+    required: false
   command:
     description: "Ray CLI command (build | publish)"
-    required: true
+    required: false
   paths:
     description: "Paths to execute on"
-    required: true
+    required: false
   cli_version:
     description: "CLI Version"
     required: false
   npm_token:
     description: "NPM token"
+    required: false
+  extension_schema:
+    description: "Extension schema"
     required: false
 outputs:
   command:
@@ -31,27 +34,30 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout
+      uses: raycast/github-actions/git-checkout@v1.10.0
     - name: Setup CLI
-      uses: raycast/github-actions/setup-cli@v1.9.0
+      uses: raycast/github-actions/setup-cli@v1.10.0
       with:
-        version: ${{ inputs.cli_version || '1.34.0-alpha.22' }}
+        version: ${{ inputs.cli_version || '1.39.0-alpha.32' }}
         access_token: ${{ inputs.access_token }}
     - name: Get command
       id: get_command
-      uses: raycast/github-actions/get-command@v1.9.0
+      uses: raycast/github-actions/get-command@v1.10.0
       with:
         custom_command: ${{ inputs.command }}
         github_event_name: ${{ github.event_name }}
     - name: Get changed extensions
       id: get_changed_extensions
-      uses: raycast/github-actions/get-changed-extensions@v1.9.0
+      uses: raycast/github-actions/get-changed-extensions@v1.10.0
       with:
         custom_paths: ${{ inputs.paths }}
         github_event_name: ${{ github.event_name }}
     - name: Ray CLI
       id: ray_cli
-      uses: raycast/github-actions/ray-cli@v1.9.0
+      uses: raycast/github-actions/ray-cli@v1.10.0
       with:
         paths: ${{ steps.get_changed_extensions.outputs.paths }}
         command: ${{ steps.get_command.outputs.command }}
         npm_token: ${{ inputs.npm_token }}
+        extension_schema: ${{ inputs.extension_schema }}
