@@ -34,7 +34,7 @@ function ray_command_from_string() {
         ;;
 
         publish)
-        ray_command="publish --skip-validation"
+        ray_command="publish --skip-validation --skip-notify-raycast"
         ray_validate_options=""
         ;;
 
@@ -54,7 +54,7 @@ scheme_path="/tmp/raycast/extensions.json"
 curl "$extension_schema" --create-dirs -o $scheme_path
 
 starting_dir=$PWD
-ray_validate="ray validate $ray_validate_options -s $scheme_path --strict --non-interactive --emoji --exit-on-error"
+ray_validate="ray validate $ray_validate_options -s $scheme_path --non-interactive --emoji --exit-on-error"
 ray_build_publish="ray $ray_command --non-interactive --emoji --exit-on-error"
 ray_ci_log_file="/tmp/raycast/ray_cli.log"
 
