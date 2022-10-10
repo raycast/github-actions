@@ -1,12 +1,33 @@
-name: 'Setup Node'
+name: "Setup Node"
 
-description: 'Setup Node'
+description: "Setup Node"
+
+inputs:
+  node-version:
+    description: "Node version"
+    required: true
+    default: 16.10.0
+  npm-version:
+    description: "NPM version (if not defined, the default one from node-version will be used)"
+    required: true
+    default: 8.3.0
 
 runs:
   using: "composite"
   steps:
     - name: Setup node
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
-        node-version: '16.10.0'
-        
+        node-version: "${{ inputs.node-version }}"
+    - name: Setup npm
+      shell: bash
+      run: |
+        npm install -g npm@${{ inputs.npm-version }}
+    - name: Installed versions
+      shell: bash
+      run: |
+        echo "Node version:"
+        node -v
+        echo "Npm version:"
+        which npm
+        npm -v
