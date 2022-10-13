@@ -15,7 +15,7 @@ runs:
   using: "composite"
   steps:
     - name: Generate "since_last_remote_commit"
-      uses: haya14busa/action-cond@v1
+      uses: haya14busa/action-cond@v1.1.0
       id: since_last_remote_commit
       with:
         cond: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -33,4 +33,4 @@ runs:
       run: |
         set -e -o noglob
         paths=$(${{ github.action_path }}/get_paths.sh "${{ inputs.github_event_name }}" "${{ steps.changed-files.outputs.all_modified_files }}" "${{ inputs.custom_paths }}")
-        echo "::set-output name=paths::$paths"
+        echo "paths=$paths" >> $GITHUB_OUTPUT

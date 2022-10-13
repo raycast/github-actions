@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Get paths
       id: get_paths
-      uses: raycast/github-actions/get-paths@v1.11.0
+      uses: raycast/github-actions/get-paths@v1.12.0
       with:
         custom_paths: ${{ inputs.custom_paths }}
         github_event_name: ${{ inputs.github_event_name }}
@@ -26,4 +26,4 @@ runs:
       run: |
         set -e -o noglob
         paths=$(${{ github.action_path }}/get_changed_extensions.sh "${{ steps.get_paths.outputs.paths }}")
-        echo "::set-output name=paths::$paths"
+        echo "paths=$paths" >> $GITHUB_OUTPUT

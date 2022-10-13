@@ -1,6 +1,6 @@
-name: 'Setup Go'
+name: "Setup Go"
 
-description: 'Setup Go'
+description: "Setup Go"
 
 runs:
   using: "composite"
@@ -9,4 +9,3 @@ runs:
       uses: actions/setup-go@v1
       with:
         go-version: "1.17.3"
-        

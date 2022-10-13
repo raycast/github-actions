@@ -1,6 +1,6 @@
-name: 'Setup Git'
+name: "Setup Git"
 
-description: 'Setup Git'
+description: "Setup Git"
 
 runs:
   using: "composite"

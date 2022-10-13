@@ -14,13 +14,13 @@ runs:
   using: "composite"
   steps:
     - name: Setup GIT
-      uses: raycast/github-actions/setup-git@v1.11.0
+      uses: raycast/github-actions/setup-git@v1.12.0
     - name: Check message
       id: check_message
       shell: bash
       run: |
         if [ ! -z "${{ inputs.store_urls }}" ]; then
-          echo ::set-output name=message_exists::'true'
+          echo "message_exists=true" >> $GITHUB_OUTPUT
         fi
     - uses: mshick/add-pr-comment@v1
       if: ${{ steps.check_message.outputs.message_exists }}

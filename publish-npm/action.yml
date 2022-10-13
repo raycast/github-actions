@@ -35,7 +35,7 @@ runs:
 
         if [[ "$version" != "$public_version" ]]; then
             npm publish
-            echo "::set-output name=version::$version"
+            echo "version=$version" >> $GITHUB_OUTPUT
         else
             echo "Skipping API publishing"
         fi
