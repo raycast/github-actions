@@ -1,0 +1,15 @@
+name: "Send Message To Slack"
+description: "Send Message To Slack"
+runs:
+  using: "node16"
+  main: "dist/index.js"
+inputs:
+  text:
+    description: "The message to send"
+    required: true
+  webhook:
+    description: "Slack Webhook"
+    required: true
+  color:
+    description: "The color to use: be 'good', 'warning', 'danger' or a hex code"
+    required: false
