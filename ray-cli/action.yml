@@ -23,7 +23,7 @@ runs:
   using: "composite"
   steps:
     - name: Install npm
-      uses: raycast/github-actions/setup-npm@v1.12.0
+      uses: raycast/github-actions/setup-npm@dev
     - name: Execute command
       shell: bash
       id: ray_cli

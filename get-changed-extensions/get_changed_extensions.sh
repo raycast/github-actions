@@ -3,7 +3,6 @@
 set -e -o noglob
 
 workspace_dir=${GITHUB_WORKSPACE}
-workspacer_parent_dir=$(dirname "$workspace_dir")
 declare -a 'directories=('"$1"')'
 
 wildcard='/**'
@@ -11,12 +10,13 @@ wildcard='/**'
 declare -a directories_to_search=()
 
 for dir in "${directories[@]}" ; do
-    if ! [[ "$dir" =~ extensions/* ]] ; then
-        continue
-    fi
+    # if ! [[ "$dir" =~ extensions/* ]] ; then
+    #     continue
+    # fi
     absolute_dir="$workspace_dir/$dir"
+
     # create array with all directories to search
-    # for normal case iterate upwards with all directories (try to not go above $workspace_dir) and then execute find on those
+    # for normal case iterate upwards with all directories (limited to $workspace_dir) and then execute find on those
     # for ** case list all directories containing package.json with raycast && commands straight away
 
     if [[ "${absolute_dir}" == *"$wildcard" ]] ; then
@@ -32,8 +32,8 @@ for dir in "${directories[@]}" ; do
             done
         done < <(find "$absolute_dir" -type d -name node_modules -prune -o -type f -name package.json -print0)
     else
-        # for standard use case, search all parent directories as changed files may be deeper than folder containing package.json
-        while [ "$absolute_dir" != $workspacer_parent_dir ];
+        # for standard use case, search all parent directories as changed files may be on different level than folder containing package.json
+        while [ "$absolute_dir" != "$workspace_dir" ];
         do
             if [ -d "$absolute_dir" ]; then
                 if [[ ! " ${directories_to_search[@]} " =~ " ${absolute_dir} " ]]; then
@@ -51,6 +51,16 @@ for dir in "${directories_to_search[@]}"; do
     if [ -d "$dir" ]; then
         # make sure package.json contains commands and raycast
         if [[ $(find "$dir" -maxdepth 1 -type f -name 'package.json' -exec grep -iq "commands" {} \; -exec grep -il "raycast" {} \;) ]]; then
+            # make sure that extension is on the right depth in folder structures
+            parent_dir=$(dirname "$(dirname "$dir")")
+
+            if [[ "$parent_dir" != "$workspace_dir" ]]; then
+                extension_name=$(basename $dir)
+                current_relative_path=${dir#"$workspace_dir"}
+                echo "::error::'$extension_name' extension is in the wrong folder. Move it to '/extensions/$extension_name' instead of '$current_relative_path'."
+                exit 1
+            fi
+
             if [[ ! " ${extension_changed[@]} " =~ " ${dir} " ]]; then
                 extension_changed+=("$dir")
             fi

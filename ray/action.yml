@@ -35,27 +35,27 @@ runs:
   using: "composite"
   steps:
     - name: Checkout
-      uses: raycast/github-actions/git-checkout@v1.12.0
+      uses: raycast/github-actions/git-checkout@dev
     - name: Setup CLI
-      uses: raycast/github-actions/setup-cli@v1.12.0
+      uses: raycast/github-actions/setup-cli@dev
       with:
         version: ${{ inputs.cli_version || '1.43.0-alpha.1' }}
         access_token: ${{ inputs.access_token }}
     - name: Get command
       id: get_command
-      uses: raycast/github-actions/get-command@v1.12.0
+      uses: raycast/github-actions/get-command@dev
       with:
         custom_command: ${{ inputs.command }}
         github_event_name: ${{ github.event_name }}
     - name: Get changed extensions
       id: get_changed_extensions
-      uses: raycast/github-actions/get-changed-extensions@v1.12.0
+      uses: raycast/github-actions/get-changed-extensions@dev
       with:
         custom_paths: ${{ inputs.paths }}
         github_event_name: ${{ github.event_name }}
     - name: Ray CLI
       id: ray_cli
-      uses: raycast/github-actions/ray-cli@v1.12.0
+      uses: raycast/github-actions/ray-cli@dev
       with:
         paths: ${{ steps.get_changed_extensions.outputs.paths }}
         command: ${{ steps.get_command.outputs.command }}

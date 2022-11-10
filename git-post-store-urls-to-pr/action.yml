@@ -14,7 +14,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup GIT
-      uses: raycast/github-actions/setup-git@v1.12.0
+      uses: raycast/github-actions/setup-git@dev
     - name: Check message
       id: check_message
       shell: bash
