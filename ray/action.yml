@@ -21,6 +21,9 @@ inputs:
   extension_schema:
     description: "Extension schema"
     required: false
+  allow_owners_only_for_extensions:
+    description: "Whitelist extensions allowed to have owners - each extension in new line. If not set or empty, all extensions are allowe to have it."
+    required: false
 outputs:
   command:
     description: "Ray CLI command executed"
@@ -35,29 +38,36 @@ runs:
   using: "composite"
   steps:
     - name: Checkout
-      uses: raycast/github-actions/git-checkout@v1.12.0
+      uses: raycast/github-actions/git-checkout@v1.13.0
     - name: Setup CLI
-      uses: raycast/github-actions/setup-cli@v1.12.0
+      uses: raycast/github-actions/setup-cli@v1.13.0
       with:
-        version: ${{ inputs.cli_version || '1.43.0-alpha.1' }}
+        version: ${{ inputs.cli_version || '1.46.0-alpha.30' }}
         access_token: ${{ inputs.access_token }}
     - name: Get command
       id: get_command
-      uses: raycast/github-actions/get-command@v1.12.0
+      uses: raycast/github-actions/get-command@v1.13.0
       with:
         custom_command: ${{ inputs.command }}
         github_event_name: ${{ github.event_name }}
     - name: Get changed extensions
       id: get_changed_extensions
-      uses: raycast/github-actions/get-changed-extensions@v1.12.0
+      uses: raycast/github-actions/get-changed-extensions@v1.13.0
       with:
         custom_paths: ${{ inputs.paths }}
         github_event_name: ${{ github.event_name }}
     - name: Ray CLI
+      if: ${{ steps.get_changed_extensions.outputs.only_deleted == 'false' }}
       id: ray_cli
-      uses: raycast/github-actions/ray-cli@v1.12.0
+      uses: raycast/github-actions/ray-cli@v1.13.0
       with:
         paths: ${{ steps.get_changed_extensions.outputs.paths }}
         command: ${{ steps.get_command.outputs.command }}
         npm_token: ${{ inputs.npm_token }}
         extension_schema: ${{ inputs.extension_schema }}
+        allow_owners_only_for_extensions: ${{ inputs.allow_owners_only_for_extensions }}
+    - name: Skip RayCLI
+      if: ${{ steps.get_changed_extensions.outputs.only_deleted == 'true' }}
+      shell: bash
+      run: |
+        echo "::notice::Skipping RayCLI - all affected extensions are deleted"

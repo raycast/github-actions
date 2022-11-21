@@ -15,6 +15,9 @@ inputs:
   extension_schema:
     description: "Extension schema"
     required: false
+  allow_owners_only_for_extensions:
+    description: "Whitelist extensions allowed to have owners - each extension in new line. If not set or empty, all extensions are allowe to have it."
+    required: false
 outputs:
   store_urls:
     description: "Store URLs for published extensions"
@@ -23,7 +26,7 @@ runs:
   using: "composite"
   steps:
     - name: Install npm
-      uses: raycast/github-actions/setup-npm@v1.12.0
+      uses: raycast/github-actions/setup-npm@v1.13.0
     - name: Execute command
       shell: bash
       id: ray_cli
@@ -31,4 +34,4 @@ runs:
         GITHUB_WORKSPACE: $GITHUB_WORKSPACE
       run: |
         set -e -o noglob
-        ${{ github.action_path }}/ray_cli.sh "${{ inputs.command }}" "${{ inputs.paths }}" "${{ inputs.npm_token }}" "${{ inputs.extension_schema }}"
+        ${{ github.action_path }}/ray_cli.sh "${{ inputs.command }}" "${{ inputs.paths }}" "${{ inputs.npm_token }}" "${{ inputs.extension_schema }}" "${{ inputs.allow_owners_only_for_extensions }}"

@@ -11,11 +11,14 @@ outputs:
   paths:
     description: "Paths based on github.event_name"
     value: ${{ steps.get_paths.outputs.paths }}
+  only_deleted:
+    description: "String returning 'true' if all changes are 'delete'"
+    value: ${{ steps.only_deleted.outputs.value }}
 runs:
   using: "composite"
   steps:
     - name: Generate "since_last_remote_commit"
-      uses: haya14busa/action-cond@v1.1.0
+      uses: haya14busa/action-cond@v1.1.1
       id: since_last_remote_commit
       with:
         cond: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -27,6 +30,7 @@ runs:
       with:
         # Fixes problems with multiple commits pushed at once to main
         since_last_remote_commit: ${{ steps.since_last_remote_commit.outputs.value }}
+        separator: ","
     - name: Get paths
       shell: bash
       id: get_paths
@@ -34,3 +38,10 @@ runs:
         set -e -o noglob
         paths=$(${{ github.action_path }}/get_paths.sh "${{ inputs.github_event_name }}" "${{ steps.changed-files.outputs.all_modified_files }}" "${{ inputs.custom_paths }}")
         echo "paths=$paths" >> $GITHUB_OUTPUT
+    - name: Generate "only_deleted"
+      uses: haya14busa/action-cond@v1.1.1
+      id: only_deleted
+      with:
+        cond: ${{ steps.changed-files.outputs.deleted_files != '' && (steps.changed-files.outputs.all_modified_files == steps.changed-files.outputs.deleted_files) }}
+        if_true: "true"
+        if_false: "false"

@@ -4,9 +4,11 @@ set -e -o noglob
 
 workspace_dir=${GITHUB_WORKSPACE}
 workspacer_parent_dir=$(dirname "$workspace_dir")
-declare -a 'directories=('"$1"')'
 
 wildcard='/**'
+
+IFS=$',' read -a directories <<< "$1"
+unset IFS
 
 declare -a directories_to_search=()
 

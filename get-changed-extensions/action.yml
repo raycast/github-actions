@@ -11,12 +11,15 @@ outputs:
   paths:
     description: "Paths for changed extensions"
     value: ${{ steps.get_changed_extensions.outputs.paths }}
+  only_deleted:
+    description: "String returning 'true' if all changes are 'delete'"
+    value: ${{ steps.get_paths.outputs.only_deleted }}
 runs:
   using: "composite"
   steps:
     - name: Get paths
       id: get_paths
-      uses: raycast/github-actions/get-paths@v1.12.0
+      uses: raycast/github-actions/get-paths@v1.13.0
       with:
         custom_paths: ${{ inputs.custom_paths }}
         github_event_name: ${{ inputs.github_event_name }}

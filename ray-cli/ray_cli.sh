@@ -26,6 +26,13 @@ else
     extension_schema="https://www.raycast.com/schemas/extension.json"
 fi
 
+if [ ! -z "$5" ]; then
+    SAVEIFS=$IFS
+    IFS=$'\n'
+    allow_owners_only_for_extensions=($5)
+    IFS=$SAVEIFS
+fi
+
 function ray_command_from_string() {
     case $1 in
         build)
@@ -71,12 +78,28 @@ for dir in "${paths[@]}" ; do
     ### Precheck package-lock existance for more readable errors
     if [ ! -f "./package-lock.json" ]; then
         echo "::error::Missing package-lock.json for $extension_folder"
-        exit 1
+        exit_code=1
+        continue
     fi
 
     if [ -f "./yarn.lock" ]; then
         echo "::error::Remove yarn.lock for $extension_folder"
-        exit 1
+        exit_code=1
+        continue
+    fi
+
+    ### Prevent 'owner' in package.json if needed
+    if [ ! -z "${allow_owners_only_for_extensions}" ]; then
+        if !(printf '%s\n' "${allow_owners_only_for_extensions[@]}" | grep -xq "$extension_folder"); then
+            has_owner=$(jq 'has("owner")' package.json)
+            if [ "$has_owner" == "true" ]; then
+                echo "::error::\"owner\" field is not allowed in package.json for $extension_folder"
+                exit_code=1
+                continue
+            fi
+        else
+            printf "Skipping 'owner' check for $extension_folder\n"
+        fi
     fi
 
     ### Create .npmrc if needed
@@ -85,7 +108,8 @@ for dir in "${paths[@]}" ; do
     if [[ "$api_version" == *"alpha"* ]]; then
         if [ -z "$npm_token" ]; then
             echo "::error::Private npm used without npm_token parameter"
-            exit 1
+            exit_code=1
+            continue
         else
             echo "//npm.pkg.github.com/:_authToken=$npm_token" > .npmrc
             echo "@raycast:registry=https://npm.pkg.github.com" >> .npmrc
@@ -102,8 +126,11 @@ for dir in "${paths[@]}" ; do
 
     if [ $last_exit_code -ne 0 ]; then
         echo "::error::Npm ci failed for $extension_folder"
+        set +e
         npm ci
-        exit 1
+        set -e
+        exit_code=1
+        continue
     fi
 
     ### Cleanup `.npmrc`
