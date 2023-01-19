@@ -26,7 +26,7 @@ runs:
         if_false: "false"
     - name: Get changed files
       id: changed-files
-      uses: tj-actions/changed-files@v14.6
+      uses: tj-actions/changed-files@v35.4.2
       with:
         # Fixes problems with multiple commits pushed at once to main
         since_last_remote_commit: ${{ steps.since_last_remote_commit.outputs.value }}
