@@ -9,5 +9,6 @@ runs:
       shell: bash
       run: |
         npm install npm@8.19.2 --location=global
-        which npm
-        npm -v
+        echo "Npm path: $(which npm)"
+        echo "Npm version: $(npm -v)"
+        echo "Prettier version: $(npx prettier --version)"
