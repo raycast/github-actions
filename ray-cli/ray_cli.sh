@@ -70,7 +70,7 @@ exit_code=$last_exit_code
 
 declare -a 'store_urls'
 
-for dir in "${paths[@]}" ; do    
+for dir in "${paths[@]}" ; do
     extension_folder=`basename $dir`
     printf "\nEntering $dir\n"
     cd "$dir"
@@ -93,7 +93,7 @@ for dir in "${paths[@]}" ; do
         if !(printf '%s\n' "${allow_owners_only_for_extensions[@]}" | grep -xq "$extension_folder"); then
             has_owner=$(jq 'has("owner")' package.json)
             if [ "$has_owner" == "true" ]; then
-                echo "::error::\"owner\" field is not allowed in package.json for $extension_folder"
+                echo "::error::We are restricting public organisation extensions for the moment. Ping \`@pedro\` on Slack to discuss it. ($extension_folder)"
                 exit_code=1
                 continue
             fi
