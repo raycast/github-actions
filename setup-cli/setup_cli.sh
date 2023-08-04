@@ -16,7 +16,16 @@ elif test "$#" -ne 1; then
     exit 1
 fi
 
-cli_url="https://cli.raycast.com/$version/linux/ray"
+os="$(uname)"
+architecture="$(uname -m)"
+architecture_dir="x86"
+if [[ "${os}" = "Darwin" && "${architecture}" = "arm64" ]]; then
+	architecture_dir="arm64"
+elif [ "${os}" = "Linux" ]; then
+	architecture_dir="linux"
+fi
+
+cli_url="https://cli.raycast.com/$version/$architecture_dir/ray"
 target_path="/usr/local/bin/ray"
 echo "Downloading: $cli_url"
 if ! wget -q -O $target_path $cli_url; then
