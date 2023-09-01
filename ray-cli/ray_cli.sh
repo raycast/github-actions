@@ -10,8 +10,8 @@ else
 fi
 
 if [ -z "$2" ]; then
-    echo "Paths not provided"
-    exit 1
+    echo "::notice::No extensions to $command. Skipping RayCLI."
+    exit 0
 else
     declare -a 'paths=('"$2"')'
 fi
