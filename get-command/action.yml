@@ -10,13 +10,22 @@ inputs:
 outputs:
   command:
     description: "command"
-    value: ${{ steps.get_command.outputs.command }}
+    value: ${{ steps.calculate_command.outputs.command }}
 runs:
   using: "composite"
   steps:
-    - name: Generate paths and command
-      shell: bash
-      id: get_command
-      run: |
-        command=$(${{ github.action_path }}/get_command.sh "${{ inputs.github_event_name }}" "${{ inputs.custom_command }}")
-        echo "command=$command" >> $GITHUB_OUTPUT
+    - name: Calculate command
+      id: calculate_command
+      uses: actions/github-script@v6
+      with:
+        script: |
+          let event_name = "${{ inputs.github_event_name }}";
+          let command;
+          if (event_name === 'push') {
+            command = 'publish';
+          } else if (event_name === 'pull_request') {
+            command = 'build';
+          } else {
+            command = "${{ inputs.custom_command }}";
+          }
+          core.setOutput("command", command);

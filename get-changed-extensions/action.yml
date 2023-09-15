@@ -11,22 +11,53 @@ outputs:
   paths:
     description: "Paths for changed extensions"
     value: ${{ steps.get_changed_extensions.outputs.paths }}
-  only_deleted:
-    description: "String returning 'true' if all changes are 'delete'"
-    value: ${{ steps.get_paths.outputs.only_deleted }}
 runs:
   using: "composite"
   steps:
-    - name: Get paths
-      id: get_paths
-      uses: raycast/github-actions/get-paths@v1.14.0
+    - name: Get changed files
+      id: get_changed_files
+      uses: actions/github-script@v6
       with:
-        custom_paths: ${{ inputs.custom_paths }}
-        github_event_name: ${{ inputs.github_event_name }}
+        script: |
+          const script = require("${{ github.action_path }}/get_changed_files.js")
+          await script({
+            github,
+            context,
+            core,
+            custom_paths: "${{ inputs.custom_paths }}"
+          })
+    - name: Checkout Sparse
+      if: env.sparse_checkout_directories != ''
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: "${{ env.sparse_checkout_directories }}"
+    # Use older fetch-depth + tj-changed-files logic for regular commits that doesn't have PRs to fetch from
+    - name: Checkout fetch depth 0
+      if: env.sparse_checkout_directories == ''
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: false
+    - name: Generate "since_last_remote_commit"
+      if: env.sparse_checkout_directories == ''
+      uses: haya14busa/action-cond@v1.1.1
+      id: since_last_remote_commit
+      with:
+        cond: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if_true: "true"
+        if_false: "false"
+    - name: Get changed files
+      if: env.sparse_checkout_directories == ''
+      id: tj-changed-files
+      uses: tj-actions/changed-files@v35.4.2
+      with:
+        # Fixes problems with multiple commits pushed at once to main
+        since_last_remote_commit: ${{ steps.since_last_remote_commit.outputs.value }}
+        separator: ","
     - name: Get changed extensions
       shell: bash
       id: get_changed_extensions
       run: |
         set -e -o noglob
-        paths=$(${{ github.action_path }}/get_changed_extensions.sh "${{ steps.get_paths.outputs.paths }}")
+        paths=$(${{ github.action_path }}/get_changed_extensions.sh "${{ steps.get_changed_files.outputs.changed_files || steps.tj-changed-files.outputs.all_modified_files }}")
         echo "paths=$paths" >> $GITHUB_OUTPUT

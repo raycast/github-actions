@@ -88,6 +88,8 @@ for dir in "${paths[@]}" ; do
         continue
     fi
 
+    git status -s
+
     ### Prevent 'owner' in package.json if needed
     if [ ! -z "${allow_owners_only_for_extensions}" ]; then
         if !(printf '%s\n' "${allow_owners_only_for_extensions[@]}" | grep -xq "$extension_folder"); then

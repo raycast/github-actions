@@ -1,6 +1,6 @@
-name: "Extensions build & publis"
+name: "Extensions build & publish"
 
-description: "Extensions build & publis"
+description: "Extensions build & publish"
 
 inputs:
   access_token:
@@ -37,8 +37,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout
-      uses: raycast/github-actions/git-checkout@v1.14.0
     - name: Setup CLI
       uses: raycast/github-actions/setup-cli@v1.14.0
       with:
