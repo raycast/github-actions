@@ -21,8 +21,6 @@ runs:
     - name: Get PR number
       uses: actions/github-script@v6
       id: pr-number
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       with:
         github-token: ${{ inputs.github_token }}
         script: |
@@ -42,18 +40,20 @@ runs:
           return pr.number
     - name: Setup GIT
       if: ${{ steps.pr-number.outputs.result != -1 }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token}}
       uses: raycast/github-actions/setup-git@master
     - name: Checkout PR
       if: ${{ steps.pr-number.outputs.result != -1 }}
       shell: bash
       run: gh pr checkout ${{ steps.pr-number.outputs.result }}
       env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github_token}}
     - name: Tag merged commit
       shell: bash
       if: ${{ steps.pr-number.outputs.result != -1 }}
       env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github_token}}
       run: |
         pr_info=$(gh pr view ${{ steps.pr-number.outputs.result }} --json headRefName,headRepository,headRepositoryOwner,maintainerCanModify,url)
         echo $pr_info
