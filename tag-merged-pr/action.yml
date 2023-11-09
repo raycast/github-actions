@@ -26,9 +26,9 @@ runs:
         script: |
           const pr = (
             await github.rest.repos.listPullRequestsAssociatedWithCommit({
-              owner: ${{ inputs.owner }},
-              repo: ${{ inputs.repo }},
-              commit_sha: ${{ inputs.commit_sha }},
+              owner: "${{ inputs.owner }}",
+              repo: "${{ inputs.repo }}",
+              commit_sha: "${{ inputs.commit_sha }}",
             })
           ).data[0];
 
