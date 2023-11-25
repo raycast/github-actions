@@ -7,8 +7,7 @@ workspacer_parent_dir=$(dirname "$workspace_dir")
 
 wildcard='/**'
 
-IFS=$',' read -a directories <<< "$1"
-unset IFS
+IFS=$',' read -r -a directories <<< "$1"
 
 declare -a directories_to_search=()
 
@@ -60,4 +59,7 @@ for dir in "${directories_to_search[@]}"; do
     fi
 done
 
-echo ${extension_changed[@]}
+SAVEIFS=$IFS
+IFS=','; 
+echo "${extension_changed[*]}";
+IFS=$SAVEIFS

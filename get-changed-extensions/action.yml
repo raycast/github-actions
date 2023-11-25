@@ -15,11 +15,11 @@ runs:
   using: "composite"
   steps:
     - name: Get changed files
-      id: get_changed_files
+      id: get_changed_extensions_pr
       uses: actions/github-script@v6
       with:
         script: |
-          const script = require("${{ github.action_path }}/get_changed_files.js")
+          const script = require("${{ github.action_path }}/get_changed_extensions_pr.js")
           await script({
             github,
             context,
@@ -59,5 +59,9 @@ runs:
       id: get_changed_extensions
       run: |
         set -e -o noglob
-        paths=$(${{ github.action_path }}/get_changed_extensions.sh "${{ steps.get_changed_files.outputs.changed_files || steps.tj-changed-files.outputs.all_modified_files }}")
-        echo "paths=$paths" >> $GITHUB_OUTPUT
+        if [[ -n "${{ steps.get_changed_extensions_pr.outputs.changed_extensions }}" ]]; then
+          echo "paths=${{ steps.get_changed_extensions_pr.outputs.changed_extensions }}" >> $GITHUB_OUTPUT
+        else
+          paths=$(${{ github.action_path }}/get_changed_extensions.sh "${{ inputs.custom_paths || steps.tj-changed-files.outputs.all_modified_files }}")
+          echo "paths=$paths" >> $GITHUB_OUTPUT
+        fi

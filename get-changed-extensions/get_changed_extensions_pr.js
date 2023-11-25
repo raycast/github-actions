@@ -6,7 +6,11 @@ module.exports = async ({ github, context, core, custom_paths }) => {
     console.log("Custom paths: " + custom_paths);
     let directories = new Set();
     if (context.eventName === 'workflow_dispatch') {
-        custom_paths.split(',').forEach(dir => directories.add(dir));
+        // wildcard case will be handled by a bash script for now as it requires full-checkout first
+        if (custom_paths != "extensions/**") {
+            // for defined set of paths, we handle it here to get sparse-checkout flow
+            custom_paths.split(',').forEach(dir => directories.add(dir));
+        }
     } else {
         let pull_number;
         if (context.payload.pull_request) {
@@ -57,12 +61,11 @@ module.exports = async ({ github, context, core, custom_paths }) => {
     }
 
     if (directories.size > 0) {
-        sparse_directories = Array.from(directories).map(path =>
-            // use /* for sparse checkout arguments instead of /** for the wildcard pattern
-            path.endsWith('/**') ? path.replace('/**', '') : path
-        );
         // using environment variable for sparse-checkout due to problems with new lines in setOutput
-        core.exportVariable('sparse_checkout_directories', Array.from(sparse_directories).join('\n'));
-        core.setOutput('changed_files', Array.from(directories).join(','));
+        core.exportVariable('sparse_checkout_directories', Array.from(directories).join('\n'));
+
+        const workspacePath = process.env.GITHUB_WORKSPACE
+        const fullPaths = Array.from(directories).map(path => `${workspacePath}/${path}`);
+        core.setOutput('changed_extensions', fullPaths.join(','));
     }
 }
