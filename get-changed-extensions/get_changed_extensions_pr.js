@@ -41,12 +41,14 @@ module.exports = async ({ github, context, core, custom_paths }) => {
 
         if (pull_number) {
             console.log("Pull request number: " + pull_number)
-            const response = await github.rest.pulls.listFiles({
-                owner: owner,
-                repo: repo,
-                pull_number: pull_number
-            });
-            const files = response.data;
+            let files = [];
+            for await (const response of github.paginate.iterator(github.rest.pulls.listFiles, {
+              owner: owner,
+              repo: repo,
+              pull_number: pull_number
+            })) {
+              files.push(...response.data);
+            }
             console.log('Files changed in the PR: ' + files.length);
             files.forEach(file => {
                 const parts = file.filename.split('/');
