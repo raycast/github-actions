@@ -21,8 +21,7 @@ module.exports = async ({ github, context, core, custom_paths }) => {
                     owner: owner,
                     repo: repo,
                     commit_sha: commitSHA,
-                })
-                .then(async function(response) {
+                }).then(async function (response) {
                     if (response.data.length > 0) {
                         const pr = response.data[0];
                         pull_number = pr.number;
@@ -43,11 +42,11 @@ module.exports = async ({ github, context, core, custom_paths }) => {
             console.log("Pull request number: " + pull_number)
             let files = [];
             for await (const response of github.paginate.iterator(github.rest.pulls.listFiles, {
-              owner: owner,
-              repo: repo,
-              pull_number: pull_number
+                owner: owner,
+                repo: repo,
+                pull_number: pull_number
             })) {
-              files.push(...response.data);
+                files.push(...response.data);
             }
             console.log('Files changed in the PR: ' + files.length);
             files.forEach(file => {

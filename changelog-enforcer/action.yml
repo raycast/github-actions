@@ -1,0 +1,15 @@
+name: "Changelog enforcer"
+description: "Force a Changelog modification on each extension modified in PR in raycast/extensions repository"
+runs:
+  using: "composite"
+  steps:
+    - name: Changelog enforcer
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const script = require("${{ github.action_path }}/index.js")
+          await script({
+            github,
+            context,
+            core
+          })
