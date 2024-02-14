@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Get changed files
       id: get_changed_extensions_pr
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const script = require("${{ github.action_path }}/get_changed_extensions_pr.js")
