@@ -1,0 +1,27 @@
+name: "Update BExt"
+
+description: "Update BExt in the macOS application to the latest release version"
+
+inputs:
+  github_token:
+    description: "Github Token"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download & update BExt for macOS
+      shell: bash
+      run: |
+        ASSET_NAME="safari-mv3-internal"
+        ASSET_NAME_ZIP="${ASSET_NAME}.zip"
+        BROWSER_EXTENSION_DIR=./Resources/BrowserExtension/
+        TEMP_DIR=$(mktemp -d)
+        gh release download --repo raycast/BExt --pattern "${ASSET_NAME_ZIP}" --dir "${TEMP_DIR}" --clobber
+        unzip "${TEMP_DIR}/${ASSET_NAME_ZIP}" -d "${TEMP_DIR}/${ASSET_NAME}"
+        mkdir -p "${BROWSER_EXTENSION_DIR}"
+
+        echo "Synchronizing files to ${BROWSER_EXTENSION_DIR}:"
+        rsync -av --ignore-existing --delete "${TEMP_DIR}/${ASSET_NAME}/" "${BROWSER_EXTENSION_DIR}"
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
