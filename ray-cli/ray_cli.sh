@@ -115,6 +115,7 @@ for dir in "${paths[@]}" ; do
         else
             echo "//npm.pkg.github.com/:_authToken=$npm_token" > .npmrc
             echo "@raycast:registry=https://npm.pkg.github.com" >> .npmrc
+            echo "legacy-peer-deps=true" >> .npmrc
             cleanup_npmrc=true
         fi
     fi
