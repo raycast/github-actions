@@ -22,7 +22,7 @@ runs:
         if [ ! -z "${{ inputs.store_urls }}" ]; then
           echo "message_exists=true" >> $GITHUB_OUTPUT
         fi
-    - uses: mshick/add-pr-comment@v1
+    - uses: mshick/add-pr-comment@v2
       if: ${{ steps.check_message.outputs.message_exists }}
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
