@@ -7,6 +7,8 @@ inputs:
     description: "Paths from user input for manually dispatched runs"
   github_event_name:
     description: "github.event_name"
+  pull_request_number:
+    description: "Pull request number"
 outputs:
   paths:
     description: "Paths for changed extensions"
@@ -24,7 +26,8 @@ runs:
             github,
             context,
             core,
-            custom_paths: "${{ inputs.custom_paths }}"
+            custom_paths: "${{ inputs.custom_paths }}",
+            pull_request_number: "${{ inputs.pull_request_number }}"
           })
     - name: Checkout Sparse
       if: env.sparse_checkout_directories != ''
