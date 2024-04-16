@@ -43,7 +43,7 @@ runs:
         fetch-tags: false
     - name: Generate "since_last_remote_commit"
       if: env.sparse_checkout_directories == ''
-      uses: haya14busa/action-cond@v1.1.1
+      uses: haya14busa/action-cond@v1.2.1
       id: since_last_remote_commit
       with:
         cond: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -52,7 +52,7 @@ runs:
     - name: Get changed files
       if: env.sparse_checkout_directories == ''
       id: tj-changed-files
-      uses: tj-actions/changed-files@v35.4.2
+      uses: tj-actions/changed-files@v44.0.1
       with:
         # Fixes problems with multiple commits pushed at once to main
         since_last_remote_commit: ${{ steps.since_last_remote_commit.outputs.value }}
