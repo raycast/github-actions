@@ -8,6 +8,7 @@ module.exports = async ({
   const commitSHA = context.sha;
   const owner = context.repo.owner;
   const repo = context.repo.repo;
+  let pull_number;
 
   console.log("Custom paths: " + custom_paths);
   console.log("Pull request number: " + pull_request_number);
@@ -25,7 +26,9 @@ module.exports = async ({
       pull_number = pull_request_number;
     } else if (context.payload.pull_request) {
       pull_number = context.payload.pull_request.number;
-    } else {
+    }
+
+    if (!pull_number) {
       try {
         await github.rest.repos
           .listPullRequestsAssociatedWithCommit({
