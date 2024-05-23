@@ -8,4 +8,4 @@ runs:
     - name: Set up Xcode version
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: 15.3.x
+        xcode-version: 15.4.x
