@@ -1,0 +1,116 @@
+name: "Slack Pull Request Activity"
+description: "A GitHub action to notify Slack about pull request activities."
+inputs:
+  pathToSlackStreamMapping:
+    description: "Mapping of file paths to Slack webhook URLs"
+    required: true
+    type: string
+runs:
+  using: "composite"
+  steps:
+    - name: Install slackify-markdown
+      shell: bash
+      run: npm install slackify-markdown
+
+    - name: Notify Slack
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const pathToSlackStreamMapping = JSON.parse(`${{ inputs.pathToSlackStreamMapping }}`);
+          const slackifyMarkdown = require('slackify-markdown');
+          const pr = context.payload.pull_request;
+          const action = context.payload.action;
+          const actor = context.actor;
+          const prEvents = {
+            opened: {
+              color: "#36A54F",
+              message: "opened"
+            },
+            closed: {
+              color: "#6F42C1",
+              message: "closed"
+            },
+            ready_for_review: {
+              color: "#36A54F",
+              message: "ready for review"
+            },
+            reopened: {
+              color: "#36A54F",
+              message: "reopened"
+            }
+          };
+          const eventData = prEvents[action] || { color: "#36A54F", message: action };
+          const slackStreams = new Set();
+          const streamPathMap = new Map();
+
+          const files = await github.paginate(github.rest.pulls.listFiles, {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: pr.number,
+          });
+          console.log(`Found ${files.length} changed files.`);
+          for (const file of files) {
+            for (const [path, slackStream] of Object.entries(pathToSlackStreamMapping)) {
+              if (file.filename.startsWith(path)) {
+                console.log(`Add stream for: ${file.filename}`);
+                slackStreams.add(slackStream);
+                streamPathMap.set(slackStream, path);
+              }
+            }
+          }
+
+          if (slackStreams.size === 0) {
+            console.log("No matching files found for Slack notification.");
+          } else {
+            console.log(`Notifying ${slackStreams.size} Slack streams.`);
+          }
+
+          const prUrl = pr.html_url;
+          const prTitle = pr.title;
+          const prNumber = pr.number;
+          const prBody = slackifyMarkdown(pr.body) || "No description provided.";
+          const actorUrl = `https://github.com/${actor}`;
+          const prAuthor = pr.user.login;
+          const prAuthorUrl = `https://github.com/${prAuthor}`;
+          const mainText = `Pull request ${eventData.message} by <${actorUrl}|${actor}>`;
+
+          const prLink = `*<${prUrl}|#${prNumber}: ${prTitle}>*`;
+
+          const attachmentText = action === "closed" ? `${prLink}` : `${prLink}\n\n${prBody}`;
+          const attachment = {
+            color: eventData.color,
+            "mrkdwn_in": ["text"],
+            text: attachmentText,
+          };
+
+          const payload = {
+            text: mainText,
+            attachments: [attachment]
+          };
+
+          let anyFailures = false;
+          for (const slackStream of slackStreams) {
+            try {
+              const response = await fetch(slackStream, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+              });
+
+              const matchedPath = streamPathMap.get(slackStream);
+
+              if (!response.ok) {
+                console.error(`Slack notification failed: ${response.statusText}`);
+                anyFailures = true;
+              } else {
+                console.log(`Notification sent to Slack webhook: ${slackStream} (path matched: ${matchedPath})`);
+              }
+            } catch (error) {
+              console.error(`Error sending notification to Slack webhook: ${slackStream}`, error);
+              anyFailures = true;
+            }
+          }
+
+          if (anyFailures) {
+            throw new Error('One or more Slack notifications failed.');
+          }

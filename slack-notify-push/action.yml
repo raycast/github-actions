@@ -1,0 +1,65 @@
+name: "Notify Slack On Push"
+description: "Send a Slack notification with commit details on push with a commit history"
+inputs:
+  SLACK_WEBHOOK_URL:
+    description: "The Slack webhook URL"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Notify Slack
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const repo = context.repo;
+          const branchName = context.ref.replace('refs/heads/', '');
+          const branchUrl = `https://github.com/${repo.owner}/${repo.repo}/tree/${branchName}`;
+          const commits = context.payload.commits.map(commit => {
+            return {
+              shortSha: commit.id.substring(0, 7),
+              commitUrl: `https://github.com/${repo.owner}/${repo.repo}/commit/${commit.id}`,
+              commitTitle: commit.message.split('\n')[0]
+            };
+          });
+          const beforeSha = context.payload.before;
+          const afterSha = context.payload.after;
+          const compareUrl = `https://github.com/${repo.owner}/${repo.repo}/compare/${beforeSha}...${afterSha}`;
+
+          const actor = context.actor;
+          const actorUrl = `https://github.com/${actor}`;
+
+          const commitsText = commits.map(commit => `> <${commit.commitUrl}|\`${commit.shortSha}\`> - ${commit.commitTitle}`).join("\n");
+          const numCommits = commits.length;
+          const commitsLabel = numCommits === 1 ? "commit" : "commits";
+
+          const payload = {
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `<${compareUrl}|${numCommits} new ${commitsLabel}> pushed to <${branchUrl}|\`${branchName}\`> by <${actorUrl}|${actor}>`
+                }
+              },
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: commitsText
+                }
+              }
+            ]
+          };
+
+          const response = await fetch(process.env.SLACK_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`Slack notification failed: ${response.statusText}`);
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ inputs.SLACK_WEBHOOK_URL }}
