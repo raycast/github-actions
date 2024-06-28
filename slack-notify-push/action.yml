@@ -25,23 +25,39 @@ runs:
           const beforeSha = context.payload.before;
           const afterSha = context.payload.after;
           const compareUrl = `https://github.com/${repo.owner}/${repo.repo}/compare/${beforeSha}...${afterSha}`;
+
           const actor = context.actor;
           const actorUrl = `https://github.com/${actor}`;
-          const commitsText = commits.map(commit => `<${commit.commitUrl}|\`${commit.shortSha}\`> - ${commit.commitTitle}`).join("\n");
+
+          const commitsText = commits.map(commit => `> <${commit.commitUrl}|\`${commit.shortSha}\`> - ${commit.commitTitle}`).join("\n");
           const numCommits = commits.length;
           const commitsLabel = numCommits === 1 ? "commit" : "commits";
+
           const payload = {
-            text: `<${compareUrl}|${numCommits} new ${commitsLabel}> pushed to <${branchUrl}|\`${branchName}\`> by <${actorUrl}|${actor}>`,
-            attachments: [{
-              color: "#242930",
-              text: commitsText
-            }]
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `<${compareUrl}|${numCommits} new ${commitsLabel}> pushed to <${branchUrl}|\`${branchName}\`> by <${actorUrl}|${actor}>`
+                }
+              },
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: commitsText
+                }
+              }
+            ]
           };
+
           const response = await fetch(process.env.SLACK_WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
+
           if (!response.ok) {
             throw new Error(`Slack notification failed: ${response.statusText}`);
           }
