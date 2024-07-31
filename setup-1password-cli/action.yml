@@ -1,0 +1,15 @@
+name: "Setup 1Password CLI"
+description: "Setup 1Password CLI"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install 1Password CLI
+      shell: pwsh
+      run: |
+        Invoke-WebRequest "https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N" -OutFile op.json
+        $opVersion = Get-Content -Raw -Path op.json | ConvertFrom-Json | select -ExpandProperty version
+        $installDir = Join-Path -Path $pwd -ChildPath 'op'
+        Invoke-WebRequest -Uri "https://cache.agilebits.com/dist/1P/op2/pkg/v$($opVersion)/op_windows_amd64_v$($opVersion).zip" -OutFile op.zip
+        Expand-Archive -Path op.zip -DestinationPath $installDir -Force
+        "$installDir" | Out-File -FilePath $env:GITHUB_PATH -Append
