@@ -182,8 +182,6 @@ done
 
 # encode multiline output for github actions
 store_urls_string=$(printf "%s\n" "${store_urls[@]}")
-store_urls_string="${store_urls_string//'%'/'%25'}"
-store_urls_string="${store_urls_string//$'\n'/'%0A'}"
-store_urls_string="${store_urls_string//$'\r'/'%0D'}"
+store_urls_string="${store_urls_string//$'\n'/ }"
 echo "store_urls=${store_urls_string}" >> $GITHUB_OUTPUT
 exit $exit_code
