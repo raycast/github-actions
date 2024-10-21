@@ -16,8 +16,10 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup npm
-      uses: raycast/github-actions/setup-npm@master
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.15.1
     - name: Publish NPM
       shell: bash
       working-directory: ${{ inputs.npm_package_path }}
