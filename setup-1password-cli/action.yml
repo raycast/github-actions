@@ -4,7 +4,8 @@ description: "Setup 1Password CLI"
 runs:
   using: "composite"
   steps:
-    - name: Install 1Password CLI
+    - name: Install 1Password CLI on Windows
+      if: runner.os == 'Windows'
       shell: pwsh
       run: |
         Invoke-WebRequest "https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N" -OutFile op.json
@@ -13,3 +14,9 @@ runs:
         Invoke-WebRequest -Uri "https://cache.agilebits.com/dist/1P/op2/pkg/v$($opVersion)/op_windows_amd64_v$($opVersion).zip" -OutFile op.zip
         Expand-Archive -Path op.zip -DestinationPath $installDir -Force
         "$installDir" | Out-File -FilePath $env:GITHUB_PATH -Append
+    - name: Install 1Password CLI on non-Windows
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        set -o pipefail
+        brew install 1password-cli 2>&1 | grep -v "disabled for this Cask"
