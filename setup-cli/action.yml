@@ -4,10 +4,10 @@ description: "Setup Raycast CLI"
 
 inputs:
   version:
-    description: "CLI version (format: v1.0.0)"
+    description: "CLI version (format: 1.0.0)"
     required: true
-  access_token:
-    description: "Access Token"
+  npm_token:
+    description: "NPM token"
     required: false
 runs:
   using: "composite"
@@ -15,4 +15,4 @@ runs:
     - name: Setup CLI
       shell: bash
       run: |
-        ${{ github.action_path }}/setup_cli.sh "${{ inputs.version }}" "${{ inputs.access_token }}"
+        ${{ github.action_path }}/setup_cli.sh "${{ inputs.version }}" "${{ inputs.npm_token }}"

@@ -3,34 +3,38 @@
 set -e
 
 version=$1
-access_token=$2
+npm_token=$2
 
-if test "$#" -eq 2; then
-    path=~/.config/raycast-debug
-    mkdir -p $path
-    config_file_path=$path/config.json
-    echo "Generate config $config_file_path"
-    jq -n --arg accesstoken "$access_token" '{"accesstoken": $accesstoken}' > $config_file_path
-elif test "$#" -ne 1; then
-    echo "Usage: setup_cli.sh version access_token"
+if [[ "$version" == *"alpha"* ]]; then
+    if [ -z "$npm_token" ]; then
+        echo "::error::Private api used without npm_token parameter"
+        exit 1
+    else
+        echo "//npm.pkg.github.com/:_authToken=$npm_token" > ~/.npmrc
+        echo "@raycast:registry=https://npm.pkg.github.com" >> ~/.npmrc
+        echo "legacy-peer-deps=true" >> ~/.npmrc
+        cleanup_npmrc=true
+    fi
+fi
+
+# npm install doesn't allow us to silence output properly
+# run it silently first and if it fails run it without silencing
+set +e
+npm install --global @raycast/api@$version --silent
+last_exit_code=${?}
+set -e
+
+if [ $last_exit_code -ne 0 ]; then
+    echo "::error::Npm install --global @raycast/api failed"
+    set +e
+    npm install --global @raycast/api@$version
+    set -e
     exit 1
 fi
 
-os="$(uname)"
-architecture="$(uname -m)"
-architecture_dir="x86"
-if [[ "${os}" = "Darwin" && "${architecture}" = "arm64" ]]; then
-	architecture_dir="arm64"
-elif [ "${os}" = "Linux" ]; then
-	architecture_dir="linux"
+# Cleanup `.npmrc`
+if [ "$cleanup_npmrc" = true ] ; then
+    rm ~/.npmrc
 fi
 
-cli_url="https://cli.raycast.com/$version/$architecture_dir/ray"
-target_path="/usr/local/bin/ray"
-echo "Downloading: $cli_url"
-if ! wget -q -O $target_path $cli_url; then
-    echo "Failed downloading $cli_url"
-    exit 1
-fi
-chmod +x $target_path
 ray version
