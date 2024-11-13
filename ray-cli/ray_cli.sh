@@ -61,7 +61,7 @@ printf "🤖 %d extensions found\n" "${#paths[@]}"
 printf '%s\n' "${paths[@]}"
 
 starting_dir=$PWD
-ray_validate="RAY_Token=\"$access_token\"ray validate $ray_validate_options -s $extension_schema --non-interactive --emoji --exit-on-error"
+ray_validate="RAY_Token=\"$access_token\" ray validate $ray_validate_options -s $extension_schema --non-interactive --emoji --exit-on-error"
 ray_build_publish="RAY_Token=\"$access_token\" ray $ray_command --non-interactive --emoji --exit-on-error"
 ray_ci_log_file="/tmp/raycast/ray_cli.log"
 
