@@ -60,7 +60,7 @@ runs:
         github_event_name: ${{ github.event_name }}
     - name: Ray CLI
       id: ray_cli
-      uses: raycast/github-actions/ray-cli@v1.16.0
+      uses: raycast/github-actions/ray-cli@f/update-setup-cli
       with:
         paths: ${{ steps.get_changed_extensions.outputs.paths }}
         command: ${{ steps.get_command.outputs.command }}
