@@ -9,6 +9,9 @@ inputs:
   command:
     description: "Ray CLI command (build | publish)"
     required: true
+  access_token:
+    description: "Raycast Access Token"
+    required: false
   npm_token:
     description: "NPM token"
     required: false
@@ -25,10 +28,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20.15.1
     - name: Execute command
       shell: bash
       id: ray_cli
@@ -36,4 +35,4 @@ runs:
         GITHUB_WORKSPACE: $GITHUB_WORKSPACE
       run: |
         set -e -o noglob
-        ${{ github.action_path }}/ray_cli.sh "${{ inputs.command }}" "${{ inputs.paths }}" "${{ inputs.npm_token }}" "${{ inputs.extension_schema }}" "${{ inputs.allow_owners_only_for_extensions }}"
+        ${{ github.action_path }}/ray_cli.sh "${{ inputs.command }}" "${{ inputs.paths }}" "${{ inputs.access_token }}" "${{ inputs.npm_token }}" "${{ inputs.extension_schema }}" "${{ inputs.allow_owners_only_for_extensions }}"
