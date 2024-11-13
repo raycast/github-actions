@@ -17,6 +17,7 @@ else
 fi
 
 if [ ! -z "$3" ]; then
+    export RAY_Token=$3
     access_token=$3
 fi
 
@@ -61,8 +62,8 @@ printf "🤖 %d extensions found\n" "${#paths[@]}"
 printf '%s\n' "${paths[@]}"
 
 starting_dir=$PWD
-ray_validate="RAY_Token=\"$access_token\" ray validate $ray_validate_options -s $extension_schema --non-interactive --emoji --exit-on-error"
-ray_build_publish="RAY_Token=\"$access_token\" ray $ray_command --non-interactive --emoji --exit-on-error"
+ray_validate="ray validate $ray_validate_options -s $extension_schema --non-interactive --emoji --exit-on-error"
+ray_build_publish="ray $ray_command --non-interactive --emoji --exit-on-error"
 ray_ci_log_file="/tmp/raycast/ray_cli.log"
 
 last_exit_code=0
