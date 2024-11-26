@@ -44,7 +44,7 @@ runs:
     - name: Setup CLI
       uses: raycast/github-actions/setup-cli@f/update-setup-cli
       with:
-        version: ${{ inputs.cli_version || '1.86.0-alpha.98' }}
+        version: ${{ inputs.cli_version || '1.87.0-alpha.14' }}
         npm_token: ${{ inputs.npm_token }}
     - name: Get command
       id: get_command
