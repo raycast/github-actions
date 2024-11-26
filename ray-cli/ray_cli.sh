@@ -66,6 +66,8 @@ ray_validate="ray validate $ray_validate_options -s $extension_schema --non-inte
 ray_build_publish="ray $ray_command --non-interactive --emoji --exit-on-error"
 ray_ci_log_file="/tmp/raycast/ray_cli.log"
 
+touch $ray_ci_log_file
+
 last_exit_code=0
 exit_code=$last_exit_code
 
