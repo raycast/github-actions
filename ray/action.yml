@@ -4,7 +4,7 @@ description: "Extensions build & publish"
 
 inputs:
   access_token:
-    description: "Access Token"
+    description: "Raycast Access Token"
     required: false
   command:
     description: "Ray CLI command (build | publish)"
@@ -37,11 +37,15 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.15.1
     - name: Setup CLI
       uses: raycast/github-actions/setup-cli@v1.16.0
       with:
-        version: ${{ inputs.cli_version || '1.85.0-alpha.24' }}
-        access_token: ${{ inputs.access_token }}
+        version: ${{ inputs.cli_version || '1.87.0' }}
+        npm_token: ${{ inputs.npm_token }}
     - name: Get command
       id: get_command
       uses: raycast/github-actions/get-command@v1.16.0
@@ -60,6 +64,7 @@ runs:
       with:
         paths: ${{ steps.get_changed_extensions.outputs.paths }}
         command: ${{ steps.get_command.outputs.command }}
+        access_token: ${{ inputs.access_token }}
         npm_token: ${{ inputs.npm_token }}
         extension_schema: ${{ inputs.extension_schema }}
         allow_owners_only_for_extensions: ${{ inputs.allow_owners_only_for_extensions }}

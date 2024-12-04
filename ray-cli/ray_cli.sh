@@ -17,19 +17,24 @@ else
 fi
 
 if [ ! -z "$3" ]; then
-    npm_token=$3
+    export RAY_Token=$3
+    access_token=$3
 fi
 
 if [ ! -z "$4" ]; then
-    extension_schema=$4
+    npm_token=$4
+fi
+
+if [ ! -z "$5" ]; then
+    extension_schema=$5
 else
     extension_schema="https://www.raycast.com/schemas/extension.json"
 fi
 
-if [ ! -z "$5" ]; then
+if [ ! -z "$6" ]; then
     SAVEIFS=$IFS
     IFS=$'\n'
-    allow_owners_only_for_extensions=($5)
+    allow_owners_only_for_extensions=($6)
     IFS=$SAVEIFS
 fi
 
@@ -56,14 +61,13 @@ ray_command_from_string $command
 printf "🤖 %d extensions found\n" "${#paths[@]}"
 printf '%s\n' "${paths[@]}"
 
-printf "🤖 Downloading JSON scheme: $extension_schema"
-scheme_path="/tmp/raycast/extensions.json"
-curl "$extension_schema" --create-dirs -o $scheme_path
-
 starting_dir=$PWD
-ray_validate="ray validate $ray_validate_options -s $scheme_path --non-interactive --emoji --exit-on-error"
+ray_validate="ray validate $ray_validate_options -s $extension_schema --non-interactive --emoji --exit-on-error"
 ray_build_publish="ray $ray_command --non-interactive --emoji --exit-on-error"
 ray_ci_log_file="/tmp/raycast/ray_cli.log"
+
+mkdir -p $(dirname $ray_ci_log_file)
+touch $ray_ci_log_file
 
 last_exit_code=0
 exit_code=$last_exit_code
