@@ -42,9 +42,9 @@ runs:
       with:
         node-version: 20.15.1
     - name: Setup CLI
-      uses: raycast/github-actions/setup-cli@f/update-setup-cli
+      uses: raycast/github-actions/setup-cli@master
       with:
-        version: ${{ inputs.cli_version || '1.87.0-alpha.15' }}
+        version: ${{ inputs.cli_version || '1.87.0' }}
         npm_token: ${{ inputs.npm_token }}
     - name: Get command
       id: get_command
@@ -60,7 +60,7 @@ runs:
         github_event_name: ${{ github.event_name }}
     - name: Ray CLI
       id: ray_cli
-      uses: raycast/github-actions/ray-cli@f/update-setup-cli
+      uses: raycast/github-actions/ray-cli@master
       with:
         paths: ${{ steps.get_changed_extensions.outputs.paths }}
         command: ${{ steps.get_command.outputs.command }}
