@@ -36,7 +36,7 @@ runs:
         echo "Registry version: $public_version"
 
         if [[ "$version" != "$public_version" ]]; then
-            npm publish
+            npm publish --provenance --access public
             echo "version=$version" >> $GITHUB_OUTPUT
         else
             echo "Skipping API publishing"
