@@ -17,7 +17,7 @@ else
 fi
 
 if [ ! -z "$3" ]; then
-    export RAY_Token=$3
+    export RAY_TOKEN=$3
     access_token=$3
 fi
 
