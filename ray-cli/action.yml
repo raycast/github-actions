@@ -12,14 +12,17 @@ inputs:
   access_token:
     description: "Raycast Access Token"
     required: false
-  npm_token:
-    description: "NPM token"
-    required: false
   extension_schema:
     description: "Extension schema"
     required: false
   allow_owners_only_for_extensions:
     description: "Whitelist extensions allowed to have owners - each extension in new line. If not set or empty, all extensions are allowe to have it."
+    required: false
+  npmrc_path:
+    description: "Path to npmrc file to access private npm packages"
+    required: false
+  raycast_api_alpha_npm_token:
+    description: "NPM token for alpha version of @raycast/api"
     required: false
 outputs:
   store_urls:
@@ -35,4 +38,4 @@ runs:
         GITHUB_WORKSPACE: $GITHUB_WORKSPACE
       run: |
         set -e -o noglob
-        ${{ github.action_path }}/ray_cli.sh "${{ inputs.command }}" "${{ inputs.paths }}" "${{ inputs.access_token }}" "${{ inputs.npm_token }}" "${{ inputs.extension_schema }}" "${{ inputs.allow_owners_only_for_extensions }}"
+        ${{ github.action_path }}/ray_cli.sh "${{ inputs.command }}" "${{ inputs.paths }}" "${{ inputs.access_token }}" "${{ inputs.extension_schema }}" "${{ inputs.allow_owners_only_for_extensions }}" "${{ inputs.npmrc_path }}" "${{ inputs.raycast_api_alpha_npm_token }}"

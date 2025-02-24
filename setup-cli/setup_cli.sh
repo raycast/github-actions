@@ -3,14 +3,14 @@
 set -e
 
 version=$1
-npm_token=$2
+raycast_api_alpha_npm_token=$2
 
 if [[ "$version" == *"alpha"* ]]; then
-    if [ -z "$npm_token" ]; then
-        echo "::error::Private api used without npm_token parameter"
+    if [ -z "$raycast_api_alpha_npm_token" ]; then
+        echo "::error::Alpha version of @raycast/api used without raycast_api_alpha_npm_token parameter"
         exit 1
     else
-        echo "//npm.pkg.github.com/:_authToken=$npm_token" > ~/.npmrc
+        echo "//npm.pkg.github.com/:_authToken=$raycast_api_alpha_npm_token" > ~/.npmrc
         echo "@raycast:registry=https://npm.pkg.github.com" >> ~/.npmrc
         echo "legacy-peer-deps=true" >> ~/.npmrc
         cleanup_npmrc=true

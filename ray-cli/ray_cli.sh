@@ -22,20 +22,24 @@ if [ ! -z "$3" ]; then
 fi
 
 if [ ! -z "$4" ]; then
-    npm_token=$4
-fi
-
-if [ ! -z "$5" ]; then
-    extension_schema=$5
+    extension_schema=$4
 else
     extension_schema="https://www.raycast.com/schemas/extension.json"
 fi
 
-if [ ! -z "$6" ]; then
+if [ ! -z "$5" ]; then
     SAVEIFS=$IFS
     IFS=$'\n'
-    allow_owners_only_for_extensions=($6)
+    allow_owners_only_for_extensions=($5)
     IFS=$SAVEIFS
+fi
+
+if [ ! -z "$6" ]; then
+    npmrc_path=$6
+fi
+
+if [ ! -z "$7" ]; then
+    raycast_api_alpha_npm_token=$7
 fi
 
 function ray_command_from_string() {
@@ -110,17 +114,24 @@ for dir in "${paths[@]}" ; do
 
     ### Create .npmrc if needed
     cleanup_npmrc=false
-    api_version=$(jq '.dependencies."@raycast/api"' package.json)
-    if [[ "$api_version" == *"alpha"* ]]; then
-        if [ -z "$npm_token" ]; then
-            echo "::error::Private npm used without npm_token parameter"
-            exit_code=1
-            continue
-        else
-            echo "//npm.pkg.github.com/:_authToken=$npm_token" > .npmrc
-            echo "@raycast:registry=https://npm.pkg.github.com" >> .npmrc
-            echo "legacy-peer-deps=true" >> .npmrc
-            cleanup_npmrc=true
+    if [ ! -z "$npmrc_path" ]; then
+        echo "Using npmrc from $npmrc_path"
+        cp $npmrc_path .npmrc
+        cleanup_npmrc=true
+    else
+        api_version=$(jq '.dependencies."@raycast/api"' package.json)
+        if [[ "$api_version" == *"alpha"* ]]; then
+            if [ -z "$raycast_api_alpha_npm_token" ]; then
+                echo "::error::Alpha version of @raycast/api used without raycast_api_alpha_npm_token parameter"
+                exit_code=1
+                continue
+            else
+                echo "Generating .npmrc for alpha version of @raycast/api"
+                echo "//npm.pkg.github.com/:_authToken=$raycast_api_alpha_npm_token" > .npmrc
+                echo "@raycast:registry=https://npm.pkg.github.com" >> .npmrc
+                echo "legacy-peer-deps=true" >> .npmrc
+                cleanup_npmrc=true
+            fi
         fi
     fi
 

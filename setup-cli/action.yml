@@ -6,8 +6,8 @@ inputs:
   version:
     description: "CLI version (format: 1.0.0)"
     required: true
-  npm_token:
-    description: "NPM token"
+  raycast_api_alpha_npm_token:
+    description: "NPM token for alpha version of @raycast/api"
     required: false
 runs:
   using: "composite"
@@ -15,4 +15,4 @@ runs:
     - name: Setup CLI
       shell: bash
       run: |
-        ${{ github.action_path }}/setup_cli.sh "${{ inputs.version }}" "${{ inputs.npm_token }}"
+        ${{ github.action_path }}/setup_cli.sh "${{ inputs.version }}" "${{ inputs.raycast_api_alpha_npm_token }}"
