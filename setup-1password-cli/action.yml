@@ -8,6 +8,10 @@ runs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
+        if (Get-Command op -ErrorAction SilentlyContinue) {
+          Write-Host "1Password CLI is already installed"
+          exit 0
+        }
         Invoke-WebRequest "https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N" -OutFile op.json
         $opVersion = Get-Content -Raw -Path op.json | ConvertFrom-Json | select -ExpandProperty version
         $installDir = Join-Path -Path $pwd -ChildPath 'op'
@@ -19,4 +23,8 @@ runs:
       shell: bash
       run: |
         set -o pipefail
+        if command -v op &> /dev/null; then
+          echo "1Password CLI is already installed"
+          exit 0
+        fi
         brew install 1password-cli 2>&1 | grep -v "disabled for this Cask"
