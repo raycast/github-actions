@@ -18,8 +18,8 @@ runs:
         Invoke-WebRequest -Uri "https://cache.agilebits.com/dist/1P/op2/pkg/v$($opVersion)/op_windows_amd64_v$($opVersion).zip" -OutFile op.zip
         Expand-Archive -Path op.zip -DestinationPath $installDir -Force
         "$installDir" | Out-File -FilePath $env:GITHUB_PATH -Append
-    - name: Install 1Password CLI on non-Windows
-      if: runner.os != 'Windows'
+    - name: Install 1Password CLI on macOS
+      if: runner.os == 'macOS'
       shell: bash
       run: |
         set -o pipefail
@@ -28,3 +28,39 @@ runs:
           exit 0
         fi
         brew install 1password-cli 2>&1 | grep -v "disabled for this Cask"
+    - name: Install 1Password CLI on Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        set -o pipefail
+        if command -v op &> /dev/null; then
+          echo "1Password CLI is already installed"
+          exit 0
+        fi
+
+        if command -v apt-get &> /dev/null; then
+          # Debian/Ubuntu
+          curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main" | sudo tee /etc/apt/sources.list.d/1password.list
+          sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
+          curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol
+          sudo mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22
+          curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+          sudo apt-get update && sudo apt-get install 1password-cli
+        elif command -v yum &> /dev/null; then
+          # RHEL/CentOS
+          sudo rpm --import https://downloads.1password.com/linux/keys/1password.asc
+          sudo sh -c 'echo -e "[1password]\nname=1Password Stable Channel\nbaseurl=https://downloads.1password.com/linux/rpm/stable/\$basearch\nenabled=1\ngpgcheck=1\nrepo_gpgcheck=1\ngpgkey=\"https://downloads.1password.com/linux/keys/1password.asc\"" > /etc/yum.repos.d/1password.repo'
+          sudo yum install 1password-cli
+        elif command -v apk &> /dev/null; then
+          # Alpine
+          sudo apk add --no-cache 1password-cli
+        else
+          # Manual installation as fallback
+          OP_VERSION=$(curl -s https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N | grep -o '"version":"[^"]*' | cut -d'"' -f4)
+          curl -sS -o op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v${OP_VERSION}/op_linux_amd64_v${OP_VERSION}.zip"
+          unzip op.zip op
+          sudo mv op /usr/local/bin/
+          sudo chmod +x /usr/local/bin/op
+          rm op.zip
+        fi
