@@ -103,7 +103,7 @@ for dir in "${paths[@]}" ; do
         if !(printf '%s\n' "${allow_owners_only_for_extensions[@]}" | grep -xq "$extension_folder"); then
             has_owner=$(jq 'has("owner")' package.json)
             if [ "$has_owner" == "true" ]; then
-                echo "::error::We are restricting public organisation extensions for the moment. Ping \`@andreas\` on Slack to discuss it. ($extension_folder)"
+                echo "::error::We are restricting public organisation extensions for the moment. Ping \`@pernielsentikaer\` on Slack to discuss it. ($extension_folder)"
                 exit_code=1
                 continue
             fi
