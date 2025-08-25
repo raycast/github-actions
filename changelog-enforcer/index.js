@@ -16,7 +16,7 @@ module.exports = async ({ github, context, core, custom_paths }) => {
       return;
     }
 
-    let files = [];
+    const files = [];
     for await (const response of github.paginate.iterator(
       github.rest.pulls.listFiles,
       {
@@ -29,9 +29,9 @@ module.exports = async ({ github, context, core, custom_paths }) => {
     }
     console.log("Files changed in the PR: " + files.length);
 
-    let extensions = new Set();
-    let missingChangelogs = [];
-    let caseMismatchChangelogs = [];
+    const extensions = new Set();
+    const missingChangelogs = [];
+    const caseMismatchChangelogs = [];
     files.forEach((file) => {
       const parts = file.filename.split("/");
       if (parts.length > 2 && parts[0] === "extensions") {
@@ -43,7 +43,7 @@ module.exports = async ({ github, context, core, custom_paths }) => {
       console.log(`- ${extension}`);
     });
 
-    let changelogFileName = "CHANGELOG.md";
+    const changelogFileName = "CHANGELOG.md";
     extensions.forEach((extension) => {
       const changelogPath = `extensions/${extension}/${changelogFileName}`;
       const changelogExists = files.some(
@@ -71,7 +71,7 @@ module.exports = async ({ github, context, core, custom_paths }) => {
       core.setFailed(
         `Missing ${changelogFileName} update for extensions: ${missingChangelogs.join(
           ", "
-        )}`
+        )}. See https://developers.raycast.com/basics/contribute-to-an-extension#develop-the-extension to learn how to update the changelog.`
       );
     }
   } catch (error) {
