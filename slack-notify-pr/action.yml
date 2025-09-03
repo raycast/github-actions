@@ -2,8 +2,12 @@ name: "Slack Pull Request Activity"
 description: "A GitHub action to notify Slack about pull request activities."
 inputs:
   pathToSlackStreamMapping:
-    description: "Mapping of file paths to Slack webhook URLs"
-    required: true
+    description: "Mapping of file paths to Slack webhook URLs for dynamic routing"
+    required: false
+    type: string
+  slackStream:
+    description: "Direct Slack webhook URL to send notifications to"
+    required: false
     type: string
 runs:
   using: "composite"
@@ -14,9 +18,11 @@ runs:
 
     - name: Notify Slack
       uses: actions/github-script@v7
+      env:
+        SLACK_STREAM: ${{ inputs.slackStream }}
+        PATH_TO_SLACK_STREAM_MAPPING: ${{ inputs.pathToSlackStreamMapping }}
       with:
         script: |
-          const pathToSlackStreamMapping = JSON.parse(`${{ inputs.pathToSlackStreamMapping }}`);
           const slackifyMarkdown = require('slackify-markdown');
           const pr = context.payload.pull_request;
           const action = context.payload.action;
@@ -40,27 +46,43 @@ runs:
             }
           };
           const eventData = prEvents[action] || { color: "#36A54F", message: action };
-          const slackStreams = new Set();
-          const streamPathMap = new Map();
 
-          const files = await github.paginate(github.rest.pulls.listFiles, {
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: pr.number,
-          });
-          console.log(`Found ${files.length} changed files.`);
-          for (const file of files) {
-            for (const [path, slackStream] of Object.entries(pathToSlackStreamMapping)) {
-              if (file.filename.startsWith(path)) {
-                console.log(`Add stream for: ${file.filename}`);
-                slackStreams.add(slackStream);
-                streamPathMap.set(slackStream, path);
+          // Support both pathToSlackStreamMapping and direct slackStream
+          let slackStreams = new Set();
+          let streamPathMap = new Map();
+
+          const slackStream = process.env.SLACK_STREAM;
+          if (slackStream) {
+            slackStreams.add(slackStream);
+          }
+
+          const pathToSlackStreamMapping = process.env.PATH_TO_SLACK_STREAM_MAPPING;
+          if (pathToSlackStreamMapping) {
+            try {
+              const parsedMapping = JSON.parse(pathToSlackStreamMapping);
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+              });
+              console.log(`Found ${files.length} changed files.`);
+              for (const file of files) {
+                for (const [path, slackStream] of Object.entries(parsedMapping)) {
+                  if (file.filename.startsWith(path)) {
+                    console.log(`Add stream for: ${file.filename}`)
+                    slackStreams.add(slackStream);
+                    streamPathMap.set(slackStream, path);
+                  }
+                }
               }
+            } catch (error) {
+              console.error('Failed to parse pathToSlackStreamMapping JSON:', error);
             }
           }
 
           if (slackStreams.size === 0) {
-            console.log("No matching files found for Slack notification.");
+            console.log("No Slack streams configured for notification.");
+            return;
           } else {
             console.log(`Notifying ${slackStreams.size} Slack streams.`);
           }
@@ -97,13 +119,13 @@ runs:
                 body: JSON.stringify(payload),
               });
 
-              const matchedPath = streamPathMap.get(slackStream);
-
               if (!response.ok) {
                 console.error(`Slack notification failed: ${response.statusText}`);
                 anyFailures = true;
               } else {
-                console.log(`Notification sent to Slack webhook: ${slackStream} (path matched: ${matchedPath})`);
+                const matchedPath = streamPathMap.get(slackStream);
+                const pathInfo = matchedPath ? ` (path matched: ${matchedPath})` : "";
+                console.log(`Notification sent to Slack webhook: ${slackStream}${pathInfo}`);
               }
             } catch (error) {
               console.error(`Error sending notification to Slack webhook: ${slackStream}`, error);
