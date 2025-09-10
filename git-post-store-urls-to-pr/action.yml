@@ -20,7 +20,7 @@ runs:
       shell: bash
       run: |
         if [ -f "package.json" ]; then
-          platforms=$(jq -r '.platforms // ["macos"] | map(if . == "macos" then "macOS" elif . == "windows" then "Windows" else . end) | join(", ")' package.json 2>/dev/null || echo "macOS")
+          platforms=$(jq -r '.platforms // ["macOS"] | join(", ")' package.json 2>/dev/null || echo "macOS")
         else
           platforms="macOS"
         fi
