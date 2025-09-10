@@ -15,6 +15,16 @@ runs:
   steps:
     - name: Setup GIT
       uses: raycast/github-actions/setup-git@v1.17.0
+    - name: Extract platforms from package.json
+      id: extract_platforms
+      shell: bash
+      run: |
+        if [ -f "package.json" ]; then
+          platforms=$(jq -r '.platforms // ["macos"] | join(", ")' package.json 2>/dev/null || echo "macos")
+        else
+          platforms="macos"
+        fi
+        echo "platforms=$platforms" >> $GITHUB_OUTPUT
     - name: Check message
       id: check_message
       shell: bash
@@ -28,6 +38,8 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token }}
       with:
         message: |
+          **Supported platforms:** ${{ steps.extract_platforms.outputs.platforms }}
+          
           **Published to the Raycast Store:**
           ${{ inputs.store_urls }}
         allow-repeats: true
