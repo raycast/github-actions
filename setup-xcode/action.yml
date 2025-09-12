@@ -5,7 +5,21 @@ description: "Setup Xcode"
 runs:
   using: "composite"
   steps:
+    - name: Detect and set up Xcode version
+      id: detect-xcode
+      shell: bash
+      run: |
+        echo "Checking for installed Xcode versions..."
+        if [ -d "/Applications/Xcode_26_beta_7.app" ]; then
+          echo "Found Xcode 26.0.0 Beta, using it"
+          XCODE_VERSION="26.0.0-beta"
+        else
+          echo "Xcode 26.0.0 Beta not found, defaulting to 26.0.0"
+          XCODE_VERSION="26.0.0"
+        fi
+        echo "Selected Xcode version: $XCODE_VERSION"
+        echo "XCODE_VERSION=$XCODE_VERSION" >> $GITHUB_OUTPUT
     - name: Set up Xcode version
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: 26.0.0-beta
+        xcode-version: ${{ steps.detect-xcode.outputs.XCODE_VERSION }}
