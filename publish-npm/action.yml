@@ -7,8 +7,10 @@ inputs:
     description: "NPM package path"
   npm_registry:
     description: "NPM registry"
+    required: false
   npm_publish_token:
     description: "Publish token"
+    required: false
 outputs:
   version:
     description: "version"
@@ -16,17 +18,29 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20.15.1
+    - name: Ensure required NPM version for Trusted Publishers
+      if: ${{ inputs.npm_publish_token == '' }}
+      id: npm_setup
+      shell: bash
+      run: |
+        required_version="11.5.1"
+        current_version=$(npm --version)
+        if npx semver "$current_version" -r "<$required_version" >/dev/null 2>&1; then
+          echo "Upgrading npm from $current_version to $required_version"
+          npm install -g npm@$required_version
+          echo "previous_version=$current_version" >> $GITHUB_OUTPUT
+        fi
     - name: Publish NPM
       shell: bash
       working-directory: ${{ inputs.npm_package_path }}
       id: publish_npm
       run: |
-        echo "//${{ inputs.npm_registry }}/:_authToken=${{ inputs.npm_publish_token }}" >> .npmrc
-        echo "@raycast:registry=https://${{ inputs.npm_registry }}" >> .npmrc
+        if [[ -n "${{ inputs.npm_registry }}" ]]; then
+          if [[ -n "${{ inputs.npm_publish_token }}" ]]; then
+            echo "//${{ inputs.npm_registry }}/:_authToken=${{ inputs.npm_publish_token }}" >> .npmrc
+          fi
+          echo "@raycast:registry=https://${{ inputs.npm_registry }}" >> .npmrc
+        fi
 
         version=`jq -r .version package.json`
         name=`jq -r .name package.json`
@@ -36,8 +50,14 @@ runs:
         echo "Registry version: $public_version"
 
         if [[ "$version" != "$public_version" ]]; then
-            npm publish
+            npm publish --tag latest
             echo "version=$version" >> $GITHUB_OUTPUT
         else
             echo "Skipping API publishing"
         fi
+    - name: Restore previous NPM version
+      if: ${{ always() && steps.npm_setup.outputs.previous_version != '' }}
+      shell: bash
+      run: |
+        echo "Restoring npm to previous version ${{ steps.npm_setup.outputs.previous_version }}"
+        npm install -g npm@${{ steps.npm_setup.outputs.previous_version }}
