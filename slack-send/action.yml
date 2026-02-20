@@ -1,8 +1,5 @@
 name: "Send Message To Slack"
 description: "Send Message To Slack"
-runs:
-  using: "node20"
-  main: "dist/index.js"
 inputs:
   text:
     description: "The message to send"
@@ -13,3 +10,34 @@ inputs:
   color:
     description: "The color to use: be 'good', 'warning', 'danger' or a hex code"
     required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Send Slack message
+      uses: actions/github-script@v8
+      env:
+        SLACK_TEXT: ${{ inputs.text }}
+        SLACK_WEBHOOK: ${{ inputs.webhook }}
+        SLACK_COLOR: ${{ inputs.color }}
+      with:
+        script: |
+          const text = process.env.SLACK_TEXT;
+          const webhook = process.env.SLACK_WEBHOOK;
+          const color = process.env.SLACK_COLOR;
+
+          if (!webhook) throw new Error("'webhook' parameter is required");
+          if (!text) throw new Error("'text' parameter is required");
+
+          const payload = color
+            ? { attachments: [{ text, color }] }
+            : { text };
+
+          const response = await fetch(webhook, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Slack notification failed: ${response.statusText}`);
+          }

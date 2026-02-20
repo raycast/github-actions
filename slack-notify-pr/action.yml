@@ -17,7 +17,7 @@ runs:
       run: npm install slackify-markdown
 
     - name: Notify Slack
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       env:
         SLACK_STREAM: ${{ inputs.slackStream }}
         PATH_TO_SLACK_STREAM_MAPPING: ${{ inputs.pathToSlackStreamMapping }}
