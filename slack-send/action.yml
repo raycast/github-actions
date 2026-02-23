@@ -21,7 +21,7 @@ runs:
         SLACK_COLOR: ${{ inputs.color }}
       with:
         script: |
-          const text = process.env.SLACK_TEXT;
+          const text = process.env.SLACK_TEXT.replace(/\\r\\n|\\r|\\n/g, '\n');
           const webhook = process.env.SLACK_WEBHOOK;
           const color = process.env.SLACK_COLOR;
 
