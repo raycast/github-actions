@@ -31,13 +31,13 @@ runs:
           })
     - name: Checkout Sparse
       if: env.sparse_checkout_directories != ''
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         sparse-checkout: "${{ env.sparse_checkout_directories }}"
     # Use older fetch-depth + tj-changed-files logic for regular commits that doesn't have PRs to fetch from
     - name: Checkout fetch depth 0
       if: env.sparse_checkout_directories == ''
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
         fetch-tags: false
@@ -52,7 +52,7 @@ runs:
     - name: Get changed files
       if: env.sparse_checkout_directories == ''
       id: tj-changed-files
-      uses: tj-actions/changed-files@v44.0.1
+      uses: tj-actions/changed-files@v47.0.5
       with:
         # Fixes problems with multiple commits pushed at once to main
         since_last_remote_commit: ${{ steps.since_last_remote_commit.outputs.value }}
