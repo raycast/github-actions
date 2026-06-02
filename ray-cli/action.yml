@@ -36,6 +36,14 @@ runs:
       id: ray_cli
       env:
         GITHUB_WORKSPACE: $GITHUB_WORKSPACE
+        ACTION_PATH: ${{ github.action_path }}
+        INPUT_COMMAND: ${{ inputs.command }}
+        INPUT_PATHS: ${{ inputs.paths }}
+        INPUT_ACCESS_TOKEN: ${{ inputs.access_token }}
+        INPUT_EXTENSION_SCHEMA: ${{ inputs.extension_schema }}
+        INPUT_ALLOW_OWNERS_ONLY: ${{ inputs.allow_owners_only_for_extensions }}
+        INPUT_NPMRC_PATH: ${{ inputs.npmrc_path }}
+        INPUT_RAYCAST_API_ALPHA_NPM_TOKEN: ${{ inputs.raycast_api_alpha_npm_token }}
       run: |
         set -e -o noglob
-        ${{ github.action_path }}/ray_cli.sh "${{ inputs.command }}" "${{ inputs.paths }}" "${{ inputs.access_token }}" "${{ inputs.extension_schema }}" "${{ inputs.allow_owners_only_for_extensions }}" "${{ inputs.npmrc_path }}" "${{ inputs.raycast_api_alpha_npm_token }}"
+        "$ACTION_PATH/ray_cli.sh" "$INPUT_COMMAND" "$INPUT_PATHS" "$INPUT_ACCESS_TOKEN" "$INPUT_EXTENSION_SCHEMA" "$INPUT_ALLOW_OWNERS_ONLY" "$INPUT_NPMRC_PATH" "$INPUT_RAYCAST_API_ALPHA_NPM_TOKEN"

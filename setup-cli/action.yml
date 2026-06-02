@@ -14,5 +14,9 @@ runs:
   steps:
     - name: Setup CLI
       shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_RAYCAST_API_ALPHA_NPM_TOKEN: ${{ inputs.raycast_api_alpha_npm_token }}
       run: |
-        ${{ github.action_path }}/setup_cli.sh "${{ inputs.version }}" "${{ inputs.raycast_api_alpha_npm_token }}"
+        "$ACTION_PATH/setup_cli.sh" "$INPUT_VERSION" "$INPUT_RAYCAST_API_ALPHA_NPM_TOKEN"

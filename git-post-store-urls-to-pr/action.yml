@@ -18,8 +18,10 @@ runs:
     - name: Check message
       id: check_message
       shell: bash
+      env:
+        INPUT_STORE_URLS: ${{ inputs.store_urls }}
       run: |
-        if [ ! -z "${{ inputs.store_urls }}" ]; then
+        if [ ! -z "$INPUT_STORE_URLS" ]; then
           echo "message_exists=true" >> $GITHUB_OUTPUT
         fi
     - uses: mshick/add-pr-comment@v3

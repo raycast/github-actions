@@ -60,11 +60,15 @@ runs:
     - name: Get changed extensions
       shell: bash
       id: get_changed_extensions
+      env:
+        CHANGED_EXTENSIONS_FROM_PR: ${{ steps.get_changed_extensions_pr.outputs.changed_extensions }}
+        CUSTOM_PATHS: ${{ inputs.custom_paths || steps.tj-changed-files.outputs.all_modified_files }}
+        ACTION_PATH: ${{ github.action_path }}
       run: |
         set -e -o noglob
-        if [[ -n "${{ steps.get_changed_extensions_pr.outputs.changed_extensions }}" ]]; then
-          echo "paths=${{ steps.get_changed_extensions_pr.outputs.changed_extensions }}" >> $GITHUB_OUTPUT
+        if [[ -n "$CHANGED_EXTENSIONS_FROM_PR" ]]; then
+          echo "paths=$CHANGED_EXTENSIONS_FROM_PR" >> $GITHUB_OUTPUT
         else
-          paths=$(${{ github.action_path }}/get_changed_extensions.sh "${{ inputs.custom_paths || steps.tj-changed-files.outputs.all_modified_files }}")
+          paths=$("$ACTION_PATH/get_changed_extensions.sh" "$CUSTOM_PATHS")
           echo "paths=$paths" >> $GITHUB_OUTPUT
         fi

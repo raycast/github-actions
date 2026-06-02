@@ -21,14 +21,17 @@ runs:
     - name: Commit
       shell: bash
       working-directory: ${{ inputs.repo_dir }}
+      env:
+        INPUT_MESSAGE: ${{ inputs.message }}
+        INPUT_AUTO_RESOLVE_CONFLICTS: ${{ inputs.auto_resolve_conflicts }}
       run: |
         if ! [[ -z $(git status -s .) ]] ; then
           git add .
           git status .
-          git commit --message "${{ inputs.message }}"
+          git commit --message "$INPUT_MESSAGE"
 
           branch_name=$(git rev-parse --abbrev-ref HEAD)
-          git_conflicts="" && [[ "${{ inputs.auto_resolve_conflicts }}" == true ]] && git_conflicts="-X ours"
+          git_conflicts="" && [[ "$INPUT_AUTO_RESOLVE_CONFLICTS" == true ]] && git_conflicts="-X ours"
           git fetch origin $branch_name
           git rebase origin/$branch_name $git_conflicts
           git push -u origin $branch_name

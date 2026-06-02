@@ -34,12 +34,15 @@ runs:
       shell: bash
       working-directory: ${{ inputs.npm_package_path }}
       id: publish_npm
+      env:
+        INPUT_NPM_REGISTRY: ${{ inputs.npm_registry }}
+        INPUT_NPM_PUBLISH_TOKEN: ${{ inputs.npm_publish_token }}
       run: |
-        if [[ -n "${{ inputs.npm_registry }}" ]]; then
-          if [[ -n "${{ inputs.npm_publish_token }}" ]]; then
-            echo "//${{ inputs.npm_registry }}/:_authToken=${{ inputs.npm_publish_token }}" >> .npmrc
+        if [[ -n "$INPUT_NPM_REGISTRY" ]]; then
+          if [[ -n "$INPUT_NPM_PUBLISH_TOKEN" ]]; then
+            echo "//$INPUT_NPM_REGISTRY/:_authToken=$INPUT_NPM_PUBLISH_TOKEN" >> .npmrc
           fi
-          echo "@raycast:registry=https://${{ inputs.npm_registry }}" >> .npmrc
+          echo "@raycast:registry=https://$INPUT_NPM_REGISTRY" >> .npmrc
         fi
 
         version=`jq -r .version package.json`
@@ -58,6 +61,8 @@ runs:
     - name: Restore previous NPM version
       if: ${{ always() && steps.npm_setup.outputs.previous_version != '' }}
       shell: bash
+      env:
+        PREVIOUS_NPM_VERSION: ${{ steps.npm_setup.outputs.previous_version }}
       run: |
-        echo "Restoring npm to previous version ${{ steps.npm_setup.outputs.previous_version }}"
-        npm install -g npm@${{ steps.npm_setup.outputs.previous_version }}
+        echo "Restoring npm to previous version $PREVIOUS_NPM_VERSION"
+        npm install -g "npm@$PREVIOUS_NPM_VERSION"

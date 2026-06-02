@@ -21,8 +21,10 @@ runs:
         node-version: "${{ inputs.node-version }}"
     - name: Setup npm
       shell: bash
+      env:
+        INPUT_NPM_VERSION: ${{ inputs.npm-version }}
       run: |
-        npm install -g npm@${{ inputs.npm-version }}
+        npm install -g "npm@$INPUT_NPM_VERSION"
     - name: Installed versions
       shell: bash
       run: |
