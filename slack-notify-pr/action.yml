@@ -23,7 +23,7 @@ runs:
         PATH_TO_SLACK_STREAM_MAPPING: ${{ inputs.pathToSlackStreamMapping }}
       with:
         script: |
-          const slackifyMarkdown = require('slackify-markdown');
+          const { slackifyMarkdown } = require('slackify-markdown');
           const pr = context.payload.pull_request;
           const action = context.payload.action;
           const actor = context.actor;
