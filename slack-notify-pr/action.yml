@@ -14,7 +14,7 @@ runs:
   steps:
     - name: Install slackify-markdown
       shell: bash
-      run: npm install slackify-markdown
+      run: npm install slackify-markdown@5
 
     - name: Notify Slack
       uses: actions/github-script@v8
