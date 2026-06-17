@@ -11,6 +11,10 @@ inputs:
   npm_publish_token:
     description: "Publish token"
     required: false
+  dry_run:
+    description: "When 'true', run `npm publish --dry-run` (validate/pack only, nothing is uploaded and the registry is not changed)"
+    required: false
+    default: "false"
 outputs:
   version:
     description: "version"
@@ -37,6 +41,7 @@ runs:
       env:
         INPUT_NPM_REGISTRY: ${{ inputs.npm_registry }}
         INPUT_NPM_PUBLISH_TOKEN: ${{ inputs.npm_publish_token }}
+        INPUT_DRY_RUN: ${{ inputs.dry_run }}
       run: |
         if [[ -n "$INPUT_NPM_REGISTRY" ]]; then
           if [[ -n "$INPUT_NPM_PUBLISH_TOKEN" ]]; then
@@ -53,8 +58,13 @@ runs:
         echo "Registry version: $public_version"
 
         if [[ "$version" != "$public_version" ]]; then
-            npm publish --tag latest
-            echo "version=$version" >> $GITHUB_OUTPUT
+            if [[ "$INPUT_DRY_RUN" == "true" ]]; then
+                echo "::notice ::[dry-run] would publish $name@$version --tag latest (nothing uploaded)"
+                npm publish --tag latest --dry-run
+            else
+                npm publish --tag latest
+                echo "version=$version" >> $GITHUB_OUTPUT
+            fi
         else
             echo "Skipping API publishing"
         fi
