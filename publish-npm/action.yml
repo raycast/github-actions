@@ -22,6 +22,16 @@ outputs:
 runs:
   using: "composite"
   steps:
+    # Install the `semver` CLI once, up front, from the public registry. We compare
+    # versions with real SemVer (not `sort -V`), but a bare `npx semver` had to resolve/
+    # fetch on the fly and failed in this repo (the workspace .npmrc redirects fetches);
+    # wrapped in `>/dev/null 2>&1` that failure was swallowed and silently mis-read.
+    # Forcing the public registry and failing the step on a bad install fixes both: a
+    # reliable binary, and no swallowed errors. The global bin persists for later steps.
+    - name: Install semver CLI
+      shell: bash
+      run: npm install -g semver --registry=https://registry.npmjs.org
+
     - name: Ensure required NPM version for Trusted Publishers
       if: ${{ inputs.npm_publish_token == '' }}
       id: npm_setup
@@ -29,10 +39,13 @@ runs:
       run: |
         required_version="11.5.1"
         current_version=$(npm --version)
-        if npx semver "$current_version" -r "<$required_version" >/dev/null 2>&1; then
+        # `semver` is guaranteed installed by the step above, so a non-zero exit here
+        # means the range isn't satisfied, never a swallowed command failure. (Leaving
+        # npm too old here is what previously broke OIDC publishing -> ENEEDAUTH.)
+        if semver "$current_version" -r "<$required_version"; then
           echo "Upgrading npm from $current_version to $required_version"
-          npm install -g npm@$required_version
-          echo "previous_version=$current_version" >> $GITHUB_OUTPUT
+          npm install -g "npm@$required_version"
+          echo "previous_version=$current_version" >> "$GITHUB_OUTPUT"
         fi
     - name: Publish NPM
       shell: bash
@@ -43,6 +56,10 @@ runs:
         INPUT_NPM_PUBLISH_TOKEN: ${{ inputs.npm_publish_token }}
         INPUT_DRY_RUN: ${{ inputs.dry_run }}
       run: |
+        # OIDC / trusted-publishing preflight diagnostics
+        echo "npm version: $(npm --version)  (OIDC trusted publishing needs >= 11.5.1)"
+        echo "OIDC id-token request URL present: ${ACTIONS_ID_TOKEN_REQUEST_URL:+yes}${ACTIONS_ID_TOKEN_REQUEST_URL:-NO (id-token: write missing?)}"
+
         if [[ -n "$INPUT_NPM_REGISTRY" ]]; then
           if [[ -n "$INPUT_NPM_PUBLISH_TOKEN" ]]; then
             echo "//$INPUT_NPM_REGISTRY/:_authToken=$INPUT_NPM_PUBLISH_TOKEN" >> .npmrc
@@ -50,23 +67,34 @@ runs:
           echo "@raycast:registry=https://$INPUT_NPM_REGISTRY" >> .npmrc
         fi
 
-        version=`jq -r .version package.json`
-        name=`jq -r .name package.json`
-        public_version=`npm show $name version`
+        version=$(jq -r .version package.json)
+        name=$(jq -r .name package.json)
+        latest_version=$(npm show "$name" version 2>/dev/null || true)
+        existing_version=$(npm show "$name@$version" version 2>/dev/null || true)
 
         echo "Candidate version: $version"
-        echo "Registry version: $public_version"
+        echo "Registry latest:   ${latest_version:-<none>}"
 
-        if [[ "$version" != "$public_version" ]]; then
-            if [[ "$INPUT_DRY_RUN" == "true" ]]; then
-                echo "::notice ::[dry-run] would publish $name@$version --tag latest (nothing uploaded)"
-                npm publish --tag latest --dry-run
-            else
-                npm publish --tag latest
-                echo "version=$version" >> $GITHUB_OUTPUT
-            fi
+        if [[ -n "$existing_version" ]]; then
+            echo "Skipping publish: $name@$version is already in the registry"
         else
-            echo "Skipping API publishing"
+            # Use `latest` only when our version is strictly newer than the registry's
+            # current latest; otherwise publish the older version under a `latest-v<major>`
+            # tag so it stays installable without moving `latest`.
+            if [[ -z "$latest_version" ]] || semver "$version" -r ">$latest_version" --include-prerelease; then
+                tag="latest"
+            else
+                tag="latest-v${version%%.*}"
+                echo "::notice ::$version is not newer than registry latest ($latest_version); publishing under '--tag $tag'"
+            fi
+
+            if [[ "$INPUT_DRY_RUN" == "true" ]]; then
+                echo "::notice ::[dry-run] would publish $name@$version --tag $tag (nothing uploaded)"
+                npm publish --tag "$tag" --dry-run
+            else
+                npm publish --tag "$tag"
+                echo "version=$version" >> "$GITHUB_OUTPUT"
+            fi
         fi
     - name: Restore previous NPM version
       if: ${{ always() && steps.npm_setup.outputs.previous_version != '' }}
