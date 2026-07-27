@@ -142,7 +142,11 @@ for dir in "${paths[@]}" ; do
     set -e
 
     if [ $last_exit_code -ne 0 ]; then
-        echo "::error::Npm ci failed for $extension_folder"
+        error_message=$(grep -E '^npm (error|ERR!)' $ray_ci_log_file | head -5 | tr '\n' ' ')
+        if [ -z "$error_message" ]; then
+            error_message=$(tail -1 $ray_ci_log_file)
+        fi
+        echo "::error title=npm ci failed for $extension_folder::$error_message"
         exit_code=1
         continue
     fi
