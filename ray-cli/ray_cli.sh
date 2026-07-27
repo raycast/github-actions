@@ -135,18 +135,14 @@ for dir in "${paths[@]}" ; do
         fi
     fi
 
-    # npm ci doesn't allow us to silence output properly
-    # run it silently first and if it fails run it without silencing
+    # stream npm output so failures and hangs are visible in the log
     set +e
-    npm ci --silent
+    npm ci --no-audit --no-fund --loglevel=error 2>&1 | tee $ray_ci_log_file ; test ${PIPESTATUS[0]} -eq 0
     last_exit_code=${?}
     set -e
 
     if [ $last_exit_code -ne 0 ]; then
         echo "::error::Npm ci failed for $extension_folder"
-        set +e
-        npm ci
-        set -e
         exit_code=1
         continue
     fi
