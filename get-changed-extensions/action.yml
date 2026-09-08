@@ -41,6 +41,11 @@ runs:
       with:
         fetch-depth: 0
         fetch-tags: false
+        # For pull requests check out the head repository so tj-actions can diff fork commits.
+        # Both expressions are empty on push events, which makes actions/checkout use its defaults.
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.ref }}
+        allow-unsafe-pr-checkout: true
     - name: Generate "since_last_remote_commit"
       if: env.sparse_checkout_directories == ''
       uses: haya14busa/action-cond@v1.2.1
