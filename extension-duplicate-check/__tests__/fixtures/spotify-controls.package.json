@@ -1,0 +1,16 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spotify-controls",
+  "title": "Spotify Controls",
+  "description": "Control Spotify playback: play, pause, skip tracks and see what's playing.",
+  "icon": "icon.png",
+  "author": "another",
+  "categories": ["Media"],
+  "license": "MIT",
+  "commands": [
+    { "name": "toggle", "title": "Toggle Play Pause", "description": "Toggle Spotify playback", "mode": "no-view" },
+    { "name": "next", "title": "Next Track", "description": "Skip to the next track", "mode": "no-view" },
+    { "name": "now-playing", "title": "Now Playing", "description": "Show the current track", "mode": "view" }
+  ],
+  "tools": [{ "name": "play-song", "title": "Play Song", "description": "Play a song on Spotify" }]
+}

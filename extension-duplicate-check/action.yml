@@ -1,0 +1,71 @@
+name: Extension Duplicate Check
+description: Flags new Raycast extensions that look like duplicates of store extensions or of other open pull requests.
+author: Raycast
+branding:
+  icon: copy
+  color: red
+
+inputs:
+  github-token:
+    description: Token used to read pull requests, comment and label. Needs `pull-requests` and `issues` write access.
+    required: false
+    default: ${{ github.token }}
+  redash-api-key:
+    description: Redash API key used to read the store catalog query. Pass it from a secret. Without it, the store is not checked.
+    required: false
+  redash-url:
+    description: Base URL of the Redash instance.
+    required: false
+    default: https://redash.raycast.com
+  redash-query-id:
+    description: ID of the Redash query that returns the store catalog.
+    required: false
+    default: "3594"
+  scorer:
+    description: Similarity scorer to use. `lexical` runs in process. `jev` shortlists with `lexical` and asks TypeSafe's Jev model to judge each match, and needs `typesafe-api-key`.
+    required: false
+    default: lexical
+  typesafe-api-key:
+    description: TypeSafe API key for the `jev` scorer. Pass it from a secret.
+    required: false
+  typesafe-model:
+    description: TypeSafe model name or alias for the `jev` scorer.
+    required: false
+    default: jev-1.14.0
+  threshold:
+    description: Score (0-1) at or above which a match counts as a possible duplicate.
+    required: false
+    default: "0.5"
+  min-score:
+    description: Matches scoring below this value (0-1) are left out of the comment and the `matches` output.
+    required: false
+    default: "0.2"
+  top-n:
+    description: Number of matches to list per source (store and open pull requests) for each new extension.
+    required: false
+    default: "5"
+  label:
+    description: Label added when a possible duplicate is found and removed otherwise. Leave empty to skip labeling.
+    required: false
+    default: ""
+  check-open-pull-requests:
+    description: Whether to compare against extensions added by other open pull requests.
+    required: false
+    default: "true"
+  comment:
+    description: Whether to comment on the pull request. A comment is created only when a possible duplicate is found, and an existing one is updated on every run.
+    required: false
+    default: "true"
+  pull-request-number:
+    description: Pull request to check. Defaults to the pull request of the triggering event.
+    required: false
+
+outputs:
+  has-duplicates:
+    description: "`true` if any match scored at or above `threshold`, otherwise `false`."
+  matches:
+    description: JSON array with one entry per new extension, listing its top store and open pull request matches with scores.
+
+runs:
+  using: node24
+  main: dist/index.js

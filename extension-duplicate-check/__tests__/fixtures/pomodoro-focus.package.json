@@ -1,0 +1,16 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pomodoro-focus",
+  "title": "Pomodoro Focus",
+  "description": "A simple pomodoro timer in your menu bar to stay focused with work intervals and breaks.",
+  "icon": "extension-icon.png",
+  "author": "someone",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    { "name": "start-pomodoro", "title": "Start Pomodoro", "description": "Start a pomodoro focus interval", "mode": "no-view" },
+    { "name": "menu-bar", "title": "Pomodoro Menu Bar", "description": "Show the timer in the menu bar", "mode": "menu-bar" }
+  ],
+  "keywords": ["focus", "timer"],
+  "dependencies": { "@raycast/api": "^1.100.0" }
+}
