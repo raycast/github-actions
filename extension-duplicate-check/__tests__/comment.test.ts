@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COMMENT_MARKER, isDuplicate, renderComment, upsertComment, type ExtensionReport } from "../src/comment";
+import { COMMENT_MARKER, renderMatchLog, isDuplicate, renderComment, upsertComment, type ExtensionReport } from "../src/comment";
 import { LexicalScorer } from "../src/scorers/lexical";
 import { manifestFixture, storeFixture } from "./helpers";
 
@@ -79,6 +79,22 @@ describe("renderComment", () => {
     expect(body).not.toContain("Thanks for your contribution");
     expect(body).toContain("> Store not checked.");
     expect(renderComment([], options)).toContain("no longer adds a new extension");
+  });
+});
+
+describe("renderMatchLog", () => {
+  it("logs signals as one JSON line that can't start a workflow command", async () => {
+    const { extension, store } = await report("spotify-controls");
+    const match = { ...store[0]!, candidate: { ...store[0]!.candidate, name: "::error::\nhi" }, relation: "same" as const };
+    const line = renderMatchLog(extension, match, "jev");
+    expect(line.startsWith("Match: {")).toBe(true);
+    expect(line).not.toContain("\n");
+    expect(JSON.parse(line.slice("Match: ".length))).toMatchObject({
+      extension: extension.name,
+      scorer: "jev",
+      relation: "same",
+      signals: match.signals,
+    });
   });
 });
 

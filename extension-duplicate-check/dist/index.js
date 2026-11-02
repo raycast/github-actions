@@ -24655,6 +24655,10 @@ function renderComment(reports, options) {
   );
   return lines.join("\n");
 }
+function renderMatchLog(extension, match, scorer) {
+  const { candidate, score, relation, signals } = match;
+  return `Match: ${JSON.stringify({ extension: extension.name, candidate: candidate.name, source: candidate.source, scorer, score, relation, signals })}`;
+}
 function isDuplicate(report, threshold) {
   return [...report.store, ...report.pullRequests].some((match) => match.score >= threshold);
 }
@@ -25532,6 +25536,7 @@ function mergeEntries(a, b) {
 }
 
 // src/main.ts
+var LOGGED_MATCHES = 10;
 async function run() {
   try {
     await check(readInputs());
@@ -25556,7 +25561,7 @@ function readInputs() {
     scorer: getInput("scorer") || "lexical",
     typesafeApiKey,
     typesafeModel: getInput("typesafe-model") || "jev-1.14.0",
-    threshold: numberInput("threshold", 0.5),
+    threshold: numberInput("threshold", 0.25),
     minScore: numberInput("min-score", 0.2),
     topN: Math.max(1, Math.floor(numberInput("top-n", 5))),
     label: getInput("label"),
@@ -25614,6 +25619,11 @@ async function check(inputs) {
     scorer = createScorer("lexical");
     results = await scorer.score(added, candidates);
   }
+  added.forEach((extension, index) => {
+    for (const match of (results[index] ?? []).slice(0, LOGGED_MATCHES)) {
+      info(renderMatchLog(extension, match, scorer.name));
+    }
+  });
   const reports = added.map((extension, index) => {
     const matches = (results[index] ?? []).filter((match) => match.score >= inputs.minScore);
     return {
