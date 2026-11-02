@@ -1,0 +1,14 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "svg-optimizer",
+  "title": "SVG Optimizer",
+  "description": "Minify SVG files from Finder with SVGO presets.",
+  "icon": "icon.png",
+  "author": "third",
+  "categories": ["Design Tools"],
+  "license": "MIT",
+  "commands": [
+    { "name": "optimize-selected", "title": "Optimize Selected SVGs", "description": "Run SVGO on the files selected in Finder", "mode": "no-view" }
+  ],
+  "keywords": ["svgo", "minify"]
+}

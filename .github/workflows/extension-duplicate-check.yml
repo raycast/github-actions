@@ -1,0 +1,48 @@
+name: Extension Duplicate Check CI
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "extension-duplicate-check/**"
+      - ".github/workflows/extension-duplicate-check.yml"
+  pull_request:
+    paths:
+      - "extension-duplicate-check/**"
+      - ".github/workflows/extension-duplicate-check.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: extension-duplicate-check-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: extension-duplicate-check
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: extension-duplicate-check/package-lock.json
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Check that dist is up to date
+        run: |
+          if [ -n "$(git status --porcelain -- dist)" ]; then
+            git status --porcelain -- dist
+            git diff -- dist | head -n 200
+            echo "::error::dist is out of date. Run 'npm run build' and commit the result."
+            exit 1
+          fi

@@ -1,0 +1,112 @@
+{
+  "query_result": {
+    "id": 1,
+    "query": "select ...",
+    "data": {
+      "columns": [
+        { "name": "name", "type": "string" },
+        { "name": "title", "type": "string" },
+        { "name": "description", "type": "string" },
+        { "name": "author_handle", "type": "string" },
+        { "name": "commands", "type": "string" },
+        { "name": "keywords", "type": "string" },
+        { "name": "categories", "type": "string" }
+      ],
+      "rows": [
+        {
+          "name": "spotify-player",
+          "title": "Spotify Player",
+          "description": "Spotify's most powerful extension: control playback, search music, browse your library and manage devices.",
+          "author_handle": "mattisssa",
+          "commands": "[{\"name\":\"search\",\"title\":\"Search\",\"description\":\"Search for artists, albums, tracks, podcasts and playlists\"},{\"name\":\"nowPlaying\",\"title\":\"Now Playing\",\"description\":\"Show the currently playing track\"},{\"name\":\"togglePlayPause\",\"title\":\"Toggle Play/Pause\",\"description\":\"Toggle playback\"},{\"name\":\"next\",\"title\":\"Next Track\",\"description\":\"Skip to the next track\"}]",
+          "keywords": "[\"music\",\"spotify\",\"player\"]",
+          "categories": "[\"Media\"]"
+        },
+        {
+          "name": "pomodoro",
+          "title": "Pomodoro",
+          "description": "Pomodoro extension with menu bar timer, focus intervals and short breaks.",
+          "author_handle": "asubbotin",
+          "commands": "[{\"name\":\"pomodoro-control-timer\",\"title\":\"Pomodoro Control Timer\",\"description\":\"Start, pause and stop pomodoro intervals\"},{\"name\":\"pomodoro-menu-bar\",\"title\":\"Pomodoro Menu Bar\",\"description\":\"Show the pomodoro timer in the menu bar\"}]",
+          "keywords": "[\"focus\",\"timer\",\"productivity\"]",
+          "categories": "[\"Productivity\"]"
+        },
+        {
+          "name": "todoist",
+          "title": "Todoist",
+          "description": "Check your Todoist tasks and quickly create new ones.",
+          "author_handle": "thomaslombart",
+          "commands": "[{\"name\":\"home\",\"title\":\"Home\",\"description\":\"See your tasks, projects and labels\"},{\"name\":\"create-task\",\"title\":\"Create Task\",\"description\":\"Create a new task in Todoist\"}]",
+          "keywords": "[\"tasks\",\"todo\"]",
+          "categories": "[\"Productivity\"]"
+        },
+        {
+          "name": "linear",
+          "title": "Linear",
+          "description": "Create, search and modify your Linear issues.",
+          "author_handle": "thomaslombart",
+          "commands": "[{\"name\":\"create-issue\",\"title\":\"Create Issue\",\"description\":\"Create a new Linear issue\"},{\"name\":\"search-issues\",\"title\":\"Search Issues\",\"description\":\"Search issues in your workspace\"}]",
+          "keywords": "[\"issue tracker\",\"project management\"]",
+          "categories": "[\"Developer Tools\", \"Productivity\"]"
+        },
+        {
+          "name": "color-picker",
+          "title": "Color Picker",
+          "description": "Pick and organize colors from anywhere on your screen.",
+          "author_handle": "thomas",
+          "commands": "[{\"name\":\"pick-color\",\"title\":\"Pick Color\",\"description\":\"Pick a color from the screen\"},{\"name\":\"organize-colors\",\"title\":\"Organize Colors\",\"description\":\"Manage saved colors\"}]",
+          "keywords": "[\"hex\",\"rgb\",\"eyedropper\"]",
+          "categories": "[\"Design Tools\"]"
+        },
+        {
+          "name": "brew",
+          "title": "Brew",
+          "description": "Search and install Homebrew formulae and casks.",
+          "author_handle": "nhojb",
+          "commands": "[{\"name\":\"search\",\"title\":\"Search\",\"description\":\"Search Homebrew packages\"},{\"name\":\"installed\",\"title\":\"Installed\",\"description\":\"List installed formulae and casks\"}]",
+          "keywords": "[\"homebrew\",\"package manager\"]",
+          "categories": "[\"Developer Tools\"]"
+        },
+        {
+          "name": "kill-process",
+          "title": "Kill Process",
+          "description": "Terminate processes sorted by CPU or memory usage.",
+          "author_handle": "rolandleth",
+          "commands": "[{\"name\":\"index\",\"title\":\"Kill Process\",\"description\":\"Kill processes by name\"}]",
+          "keywords": "[\"terminate\",\"cpu\",\"memory\"]",
+          "categories": "[\"System\"]"
+        },
+        {
+          "name": "google-translate",
+          "title": "Google Translate",
+          "description": "Translate text between languages with Google Translate.",
+          "author_handle": "gebeto",
+          "commands": "[{\"name\":\"translate\",\"title\":\"Translate\",\"description\":\"Translate text\"},{\"name\":\"translate-form\",\"title\":\"Translate Form\",\"description\":\"Translate long text in a form\"}]",
+          "keywords": "[\"language\",\"translation\"]",
+          "categories": "[\"Productivity\"]"
+        },
+        {
+          "name": "notion",
+          "title": "Notion",
+          "description": "Search, create and update Notion pages and databases.",
+          "author_handle": "notion",
+          "commands": "[{\"name\":\"search-page\",\"title\":\"Search Notion\",\"description\":\"Search pages\"},{\"name\":\"create-database-page\",\"title\":\"Create Database Page\",\"description\":\"Add a page to a database\"}]",
+          "keywords": "[\"notes\",\"wiki\"]",
+          "categories": "[\"Productivity\"]"
+        },
+        {
+          "name": "timers",
+          "title": "Timers",
+          "description": "Start, stop and track multiple countdown timers and stopwatches.",
+          "author_handle": "ThatNerd",
+          "commands": "[{\"name\":\"startTimer\",\"title\":\"Start Timer\",\"description\":\"Start a custom countdown timer\"},{\"name\":\"manageTimers\",\"title\":\"Manage Timers\",\"description\":\"List running timers\"}]",
+          "keywords": "[\"countdown\",\"stopwatch\",\"alarm\"]",
+          "categories": "[\"Productivity\"]"
+        }
+      ]
+    },
+    "data_scanned": "N/A",
+    "runtime": 0.12,
+    "retrieved_at": "2026-10-29T12:00:00.000Z"
+  }
+}
