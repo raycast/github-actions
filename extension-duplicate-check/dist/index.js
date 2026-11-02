@@ -24642,7 +24642,7 @@ function renderComment(reports, options) {
     lines.push(...renderTable([...report.store, ...report.pullRequests], options.threshold), "");
   }
   lines.push(
-    options.scorer === "jev" ? `Scores come from TypeSafe's Jev model, which judged the closest matches of the \`lexical\` scorer: how likely an extension already does the main task of this one, unless the two are built for different apps or services. Matches from ${options.threshold} are flagged.` : `Scores range from 0 to 1 and come from the \`${options.scorer}\` scorer, which compares titles, descriptions, commands and keywords, and the similarity of names. Matches from ${options.threshold} are flagged.`,
+    `Scores range from 0 to 1 and show how closely an existing extension matches this one. Matches from ${options.threshold} are flagged.`,
     "",
     "</details>",
     ""
@@ -25611,7 +25611,6 @@ async function check(inputs) {
       throw error2;
     }
     warning(`The ${scorer.name} scorer failed, falling back to lexical: ${errorMessage(error2)}`);
-    unavailable.push(`The \`${scorer.name}\` scorer was unavailable, so these matches come from the \`lexical\` scorer.`);
     scorer = createScorer("lexical");
     results = await scorer.score(added, candidates);
   }
@@ -25625,7 +25624,7 @@ async function check(inputs) {
   });
   const hasDuplicates = reports.some((report) => isDuplicate(report, inputs.threshold));
   setOutputs(reports, hasDuplicates);
-  const body = renderComment(reports, commentOptions(inputs, unavailable, pullRequest.author, scorer.name));
+  const body = renderComment(reports, commentOptions(inputs, unavailable, pullRequest.author));
   if (process.env.GITHUB_STEP_SUMMARY) {
     await summary.addRaw(body).write();
   }
@@ -25655,7 +25654,7 @@ async function resolvePullRequest(octokit, repository, number) {
 async function loadStore(inputs, unavailable) {
   if (!inputs.redashApiKey) {
     warning("redash-api-key is not set, skipping the store catalog.");
-    unavailable.push("The store catalog was not checked because no Redash API key is configured.");
+    unavailable.push("Store extensions could not be checked this time.");
     return [];
   }
   try {
@@ -25666,7 +25665,7 @@ async function loadStore(inputs, unavailable) {
     });
   } catch (error2) {
     warning(`Could not load the store catalog: ${errorMessage(error2)}`);
-    unavailable.push("The store catalog could not be loaded, so store extensions were not checked.");
+    unavailable.push("Store extensions could not be checked this time.");
     return [];
   }
 }
@@ -25678,12 +25677,12 @@ async function loadOpenPullRequests(octokit, repository, current, inputs, unavai
     return await fetchOpenPullRequestExtensions(octokit, repository, current);
   } catch (error2) {
     warning(`Could not load open pull requests: ${errorMessage(error2)}`);
-    unavailable.push("Open pull requests could not be loaded, so they were not checked.");
+    unavailable.push("Open pull requests could not be checked this time.");
     return [];
   }
 }
-function commentOptions(inputs, unavailable, author, scorer = inputs.scorer) {
-  return { threshold: inputs.threshold, scorer, unavailable, author };
+function commentOptions(inputs, unavailable, author) {
+  return { threshold: inputs.threshold, unavailable, author };
 }
 function setOutputs(reports, hasDuplicates) {
   setOutput("has-duplicates", hasDuplicates ? "true" : "false");

@@ -12,7 +12,6 @@ export interface ExtensionReport {
 
 export interface CommentOptions {
   threshold: number;
-  scorer: string;
   /** Sources that could not be searched, with the reason. */
   unavailable: string[];
   /** GitHub login of the pull request author, greeted at the top of the comment. */
@@ -74,13 +73,8 @@ export function renderComment(reports: ExtensionReport[], options: CommentOption
     lines.push(...renderTable([...report.store, ...report.pullRequests], options.threshold), "");
   }
   lines.push(
-    options.scorer === "jev"
-      ? "Scores come from TypeSafe's Jev model, which judged the closest matches of the `lexical` scorer: how likely " +
-          "an extension already does the main task of this one, unless the two are built for different apps or " +
-          `services. Matches from ${options.threshold} are flagged.`
-      : `Scores range from 0 to 1 and come from the \`${options.scorer}\` scorer, which compares titles, ` +
-          "descriptions, commands and keywords, and the similarity of names. Matches from " +
-          `${options.threshold} are flagged.`,
+    "Scores range from 0 to 1 and show how closely an existing extension matches this one. Matches from " +
+      `${options.threshold} are flagged.`,
     "",
     "</details>",
     "",
