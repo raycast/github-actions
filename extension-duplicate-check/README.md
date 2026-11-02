@@ -170,8 +170,8 @@ ghq, so they are worth a reviewer's look anyway. Of the 17 duplicates it misses 
 
 The relation also words the comment. `same` becomes "covers the same core functionality" and `enhancement` asks the
 author to contribute the new features to the existing extension, as reviewers do by hand. Retries cover network
-errors, `429`, `529` and server errors. If TypeSafe still fails, the action falls back to `lexical` and says so in the
-comment.
+errors, `429`, `529` and server errors. If TypeSafe still fails, the action falls back to `lexical` and adds a warning
+to the workflow run. The comment and job summary never name the scorer or other backends.
 
 A request is about 5,000 input tokens. At $0.042 per million input tokens, with output free, roughly 800 runs a month
 cost about $0.20. The 394-pull-request backtest took 25 seconds.

@@ -115,9 +115,8 @@ async function check(inputs: Inputs): Promise<void> {
     if (scorer.name === "lexical") {
       throw error;
     }
-    // A model outage shouldn't block the check: fall back to the in-process scorer and say so.
+    // A model outage shouldn't block the check: fall back to the in-process scorer and warn in the run.
     core.warning(`The ${scorer.name} scorer failed, falling back to lexical: ${errorMessage(error)}`);
-    unavailable.push(`The \`${scorer.name}\` scorer was unavailable, so these matches come from the \`lexical\` scorer.`);
     scorer = createScorer("lexical");
     results = await scorer.score(added, candidates);
   }
@@ -133,7 +132,7 @@ async function check(inputs: Inputs): Promise<void> {
   const hasDuplicates = reports.some((report) => isDuplicate(report, inputs.threshold));
   setOutputs(reports, hasDuplicates);
 
-  const body = renderComment(reports, commentOptions(inputs, unavailable, pullRequest.author, scorer.name));
+  const body = renderComment(reports, commentOptions(inputs, unavailable, pullRequest.author));
   if (process.env.GITHUB_STEP_SUMMARY) {
     await core.summary.addRaw(body).write();
   }
@@ -170,7 +169,7 @@ async function resolvePullRequest(
 async function loadStore(inputs: Inputs, unavailable: string[]): Promise<Extension[]> {
   if (!inputs.redashApiKey) {
     core.warning("redash-api-key is not set, skipping the store catalog.");
-    unavailable.push("The store catalog was not checked because no Redash API key is configured.");
+    unavailable.push("Store extensions could not be checked this time.");
     return [];
   }
   try {
@@ -181,7 +180,7 @@ async function loadStore(inputs: Inputs, unavailable: string[]): Promise<Extensi
     });
   } catch (error) {
     core.warning(`Could not load the store catalog: ${errorMessage(error)}`);
-    unavailable.push("The store catalog could not be loaded, so store extensions were not checked.");
+    unavailable.push("Store extensions could not be checked this time.");
     return [];
   }
 }
@@ -200,13 +199,13 @@ async function loadOpenPullRequests(
     return await fetchOpenPullRequestExtensions(octokit, repository, current);
   } catch (error) {
     core.warning(`Could not load open pull requests: ${errorMessage(error)}`);
-    unavailable.push("Open pull requests could not be loaded, so they were not checked.");
+    unavailable.push("Open pull requests could not be checked this time.");
     return [];
   }
 }
 
-function commentOptions(inputs: Inputs, unavailable: string[], author?: string, scorer = inputs.scorer) {
-  return { threshold: inputs.threshold, scorer, unavailable, author };
+function commentOptions(inputs: Inputs, unavailable: string[], author?: string) {
+  return { threshold: inputs.threshold, unavailable, author };
 }
 
 function setOutputs(reports: ExtensionReport[], hasDuplicates: boolean) {

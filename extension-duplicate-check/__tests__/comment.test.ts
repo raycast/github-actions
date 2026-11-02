@@ -19,7 +19,7 @@ async function report(name: string): Promise<ExtensionReport> {
   };
 }
 
-const options = { threshold: 0.6, scorer: "lexical", unavailable: [] };
+const options = { threshold: 0.6, unavailable: [] };
 
 describe("renderComment", () => {
   it("greets the author and lists flagged matches in the reviewers' voice", async () => {
@@ -55,17 +55,22 @@ describe("renderComment", () => {
   it("words the comment from the relation a model judged", async () => {
     const spotify = await report("spotify-controls");
     spotify.store = spotify.store.map((match, index) => ({ ...match, relation: index === 0 ? "enhancement" : "different" }));
-    const body = renderComment([spotify], { ...options, scorer: "jev" });
+    const body = renderComment([spotify], options);
     expect(body).toContain("We found an extension with the same main purpose as **Spotify Controls**:");
     expect(body).toContain("Your extension seems to add features on top of it. These look like natural enhancements");
     expect(body).toContain("| Extension | Where | Relation | Score |");
     expect(body).toContain("Same purpose, adds features");
-    expect(body).toContain("TypeSafe's Jev model");
 
     spotify.store[0] = { ...spotify.store[0]!, relation: "same" };
-    expect(renderComment([spotify], { ...options, scorer: "jev" })).toContain(
+    expect(renderComment([spotify], options)).toContain(
       "We found an extension that covers the same core functionality as **Spotify Controls**:",
     );
+  });
+
+  it("doesn't name the backends behind the check", async () => {
+    const body = renderComment([await report("spotify-controls")], options);
+    expect(body).toContain("Scores range from 0 to 1");
+    expect(body).not.toMatch(/jev|lexical|typesafe|redash|scorer|model/i);
   });
 
   it("reports unavailable sources, no matches, and no new extension", async () => {
