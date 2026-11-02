@@ -91,6 +91,12 @@ export function renderComment(reports: ExtensionReport[], options: CommentOption
   return lines.join("\n");
 }
 
+/** One log line per match. JSON keeps manifest text on one line, and the prefix stops it reading as a workflow command. */
+export function renderMatchLog(extension: Extension, match: Match, scorer: string): string {
+  const { candidate, score, relation, signals } = match;
+  return `Match: ${JSON.stringify({ extension: extension.name, candidate: candidate.name, source: candidate.source, scorer, score, relation, signals })}`;
+}
+
 export function isDuplicate(report: ExtensionReport, threshold: number): boolean {
   return [...report.store, ...report.pullRequests].some((match) => match.score >= threshold);
 }

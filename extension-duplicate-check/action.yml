@@ -35,7 +35,7 @@ inputs:
   threshold:
     description: Score (0-1) at or above which a match counts as a possible duplicate.
     required: false
-    default: "0.5"
+    default: "0.25"
   min-score:
     description: Matches scoring below this value (0-1) are left out of the comment and the `matches` output.
     required: false

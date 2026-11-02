@@ -74,7 +74,7 @@ raycast/extensions doesn't run Dependabot, so bump the SHA by hand after changin
 | `scorer`                   | `lexical`                    | `lexical` scores in process. `jev` shortlists with `lexical` and asks TypeSafe's Jev model to judge each match.                                                                                          |
 | `typesafe-api-key`         |                              | TypeSafe API key, required by the `jev` scorer. Pass it from a secret.                                                                                                                                   |
 | `typesafe-model`           | `jev-1.14.0`                 | TypeSafe model name or alias for the `jev` scorer. Pinned because thresholds are tuned per version and `jev-latest` can move.                                                                            |
-| `threshold`                | `0.5`                        | Score (0–1) at or above which a match counts as a possible duplicate.                                                                                                                                    |
+| `threshold`                | `0.25`                       | Score (0–1) at or above which a match counts as a possible duplicate.                                                                                                                                    |
 | `min-score`                | `0.2`                        | Matches below this score are left out of the comment and the `matches` output.                                                                                                                           |
 | `top-n`                    | `5`                          | Number of matches listed per source (store and open pull requests) for each new extension.                                                                                                               |
 | `label`                    |                              | Label added when a possible duplicate is found and removed otherwise. Empty disables labeling.                                                                                                           |
@@ -131,7 +131,7 @@ The `lexical` scorer combines two signals:
   0.8 count as unrelated.
 
 The score is `1 - (1 - content) × (1 - 0.5 × name)`, so either signal alone can raise it and identical names alone reach
-0.5. The default threshold of 0.5 comes from a backtest over three months of new-extension pull requests: it flagged
+0.5. A threshold of 0.5 in a backtest over three months of new-extension pull requests flagged
 37% of those closed as duplicates of a store extension and 11% of those that were merged.
 
 The lexical scorer misses duplicates that describe the same thing in different words. In the same backtest it ranked
@@ -167,6 +167,12 @@ over the same three months, with `jev-1.14.0`:
 
 Most of the merged extensions it flags overlap a lot with an existing one, such as WHost and iHosts, or Ghq Plus and
 ghq, so they are worth a reviewer's look anyway. Of the 17 duplicates it misses at 0.5, 12 score below 0.4.
+
+The default threshold is 0.25, lower than anything in this backtest, so that matches like Everything Search, which
+scored 0.40 against the Store's Everything, get flagged. Expect more flagged merged extensions than the table shows.
+
+Each run logs up to 10 matches per new extension as `Match: {...}` JSON lines, with `covers`, `services` and the other
+signals, including matches below `min-score`.
 
 The relation also words the comment. `same` becomes "covers the same core functionality" and `enhancement` asks the
 author to contribute the new features to the existing extension, as reviewers do by hand. Retries cover network

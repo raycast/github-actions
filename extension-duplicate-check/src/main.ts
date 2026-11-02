@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import { context, getOctokit } from "@actions/github";
-import { isDuplicate, renderComment, upsertComment, type ExtensionReport } from "./comment";
+import { isDuplicate, renderComment, renderMatchLog, upsertComment, type ExtensionReport } from "./comment";
 import { createScorer } from "./scorers";
 import {
   fetchAddedExtensions,
@@ -29,6 +29,9 @@ interface Inputs {
   pullRequestNumber?: number;
 }
 
+/** The size of the `jev` shortlist, so every judged match reaches the run log. */
+const LOGGED_MATCHES = 10;
+
 export async function run(): Promise<void> {
   try {
     await check(readInputs());
@@ -54,7 +57,7 @@ function readInputs(): Inputs {
     scorer: core.getInput("scorer") || "lexical",
     typesafeApiKey,
     typesafeModel: core.getInput("typesafe-model") || "jev-1.14.0",
-    threshold: numberInput("threshold", 0.5),
+    threshold: numberInput("threshold", 0.25),
     minScore: numberInput("min-score", 0.2),
     topN: Math.max(1, Math.floor(numberInput("top-n", 5))),
     label: core.getInput("label"),
@@ -120,6 +123,11 @@ async function check(inputs: Inputs): Promise<void> {
     scorer = createScorer("lexical");
     results = await scorer.score(added, candidates);
   }
+  added.forEach((extension, index) => {
+    for (const match of (results[index] ?? []).slice(0, LOGGED_MATCHES)) {
+      core.info(renderMatchLog(extension, match, scorer.name));
+    }
+  });
   const reports: ExtensionReport[] = added.map((extension, index) => {
     const matches = (results[index] ?? []).filter((match) => match.score >= inputs.minScore);
     return {
