@@ -46,7 +46,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: raycast/github-actions/extension-duplicate-check@<commit-sha>
+      - uses: raycast/github-actions/extension-duplicate-check@master
         with:
           github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
           redash-api-key: ${{ secrets.REDASH_API_KEY }}
@@ -60,8 +60,8 @@ action never checks out or runs code from the pull request: it only reads `packa
 GitHub API. Keep it that way in the calling workflow too: do not add an `actions/checkout` of the pull request head or
 any step that runs pull request code in this job, since it has the bot token, the Redash key and the TypeSafe key.
 
-Pin the action to a full commit SHA rather than a tag, so a moved tag cannot change the code that receives the secret.
-raycast/extensions doesn't run Dependabot, so bump the SHA by hand after changing this action.
+The workflow tracks `master`, like other `raycast/github-actions` references, so changes here apply on the next run.
+That code receives the secrets, so changes to this folder need a reviewed pull request.
 
 ## Inputs
 
@@ -212,7 +212,7 @@ Most of this needs a raycast/extensions admin. Steps 1 to 3 can land in one pull
    );
    ```
 
-3. **Workflow.** Add the workflow from [Usage](#usage), pinned to a commit SHA of this repository.
+3. **Workflow.** Add the workflow from [Usage](#usage).
 
 4. **Label.** If you set `label`, create `possible-duplicate` in raycast/extensions first, so it gets a colour and a
    description instead of the defaults GitHub uses for labels created on the fly.
